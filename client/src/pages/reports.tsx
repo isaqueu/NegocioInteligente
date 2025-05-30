@@ -30,9 +30,9 @@ export default function Reports() {
   const [filters, setFilters] = useState({
     startDate: "",
     endDate: "",
-    userId: "",
-    type: "",
-    paymentType: "",
+    userId: "todos",
+    type: "todos",
+    paymentType: "todos",
   });
 
   const { data: resumo } = useQuery<ResumoFinanceiro>({
@@ -130,7 +130,7 @@ export default function Reports() {
                   <SelectValue placeholder="Todos" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos</SelectItem>
+                  <SelectItem value="todos">Todos</SelectItem>
                   {users?.map((user) => (
                     <SelectItem key={user.id} value={user.id.toString()}>
                       {user.nome}
@@ -151,7 +151,7 @@ export default function Reports() {
                   <SelectValue placeholder="Todos" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos</SelectItem>
+                  <SelectItem value="todos">Todos</SelectItem>
                   <SelectItem value="entrada">Entradas</SelectItem>
                   <SelectItem value="saida">Saídas</SelectItem>
                 </SelectContent>
@@ -169,7 +169,7 @@ export default function Reports() {
                   <SelectValue placeholder="Todos" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos</SelectItem>
+                  <SelectItem value="todos">Todos</SelectItem>
                   <SelectItem value="avista">À Vista</SelectItem>
                   <SelectItem value="parcelado">Parcelado</SelectItem>
                 </SelectContent>

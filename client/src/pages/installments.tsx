@@ -14,9 +14,9 @@ import type { Saida, User } from "@shared/schema";
 
 export default function Installments() {
   const [filters, setFilters] = useState({
-    status: "",
+    status: "todos",
     month: "",
-    userId: "",
+    userId: "todos",
   });
 
   const { toast } = useToast();
@@ -132,7 +132,7 @@ export default function Installments() {
                   <SelectValue placeholder="Todos" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos</SelectItem>
+                  <SelectItem value="todos">Todos</SelectItem>
                   <SelectItem value="a_vencer">A Vencer</SelectItem>
                   <SelectItem value="vencida">Vencida</SelectItem>
                   <SelectItem value="paga">Paga</SelectItem>
@@ -163,7 +163,7 @@ export default function Installments() {
                   <SelectValue placeholder="Todos" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos</SelectItem>
+                  <SelectItem value="todos">Todos</SelectItem>
                   {users?.map((user) => (
                     <SelectItem key={user.id} value={user.id.toString()}>
                       {user.nome}

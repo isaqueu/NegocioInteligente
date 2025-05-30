@@ -1,0 +1,25 @@
+Gostei da estilização, mantenha desta forma.
+
+Na gestão de usuário: não teremos saldo individual, referente ao saldo só teremos o saldo familiar conjunto e não individual.
+
+No registro de saída: a sessão de itens da compra deve ficar no topo sendo, abaixo vem o total, e logo abaixo do total vem as informações complementares da saída, 
+na sessão de itens da compra  não pode ser um componente simples de selecionar na lista porque pode haver muitos produtos/serviços e a lista ficaria enorme, deverá 
+ter duas opçõe, a primeira adicionar o item lendo o qrcode, ou seja usuário clica para abrir leitura do qrcode, le o qrcode, envia o codigo para backend que retorna 
+o produto já com o preço unitário sendo preenchido na tela as informações do produto e preço unitário, a segunda opção é ter um campo que digita e aparece uma lista 
+com as palvras que ele digitou por exemplo: usuário digita "cam" então aparece um select com as opções:
+"CAMA"
+"CAMARAO"
+"CAMPARI"
+depois segue a mesma regra do qrcode, ao clicar envia os dado para backend que retorna as informações do produto com valor unitário, fazer uma validação para só inserir 
+novo item se não tiver nenhum item vazio na lista.
+refernte a seleção de Membros Participantes coloque uma opção de clique denominada Familia, clicando nessa opção de clique que pode ser um botão ou icone serão marcados
+todos os membros da familia, é somente um facilitador para não ter que marcar um a um quando todos tiver que ser selecionado.
+
+Na Pagina de Parcelas esta gerando erros e não esta abrindo:
+[plugin:runtime-error-plugin] A <Select.Item /> must have a value prop that is not an empty string. This is because the Select value can be set to an empty string to clear the selection and show the placeholder.
+
+
+Pagina de Relatórios esta gerando erros e não abre:
+[plugin:runtime-error-plugin] A <Select.Item /> must have a value prop that is not an empty string. This is because the Select value can be set to an empty string to clear the selection and show the placeholder.
+
+Realize essas correções com muita atenção, não altere os estilos definidos e só altere o que foi pedido nesse ajuste
