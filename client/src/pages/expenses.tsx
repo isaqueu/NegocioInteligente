@@ -11,7 +11,8 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { authService } from "@/lib/auth";
 import { formatCurrency, addMonths } from "@/lib/utils";
-import { Loader2, Plus, Trash2 } from "lucide-react";
+import { Loader2, Plus, Trash2, QrCode, Search, Users } from "lucide-react";
+import BarcodeScanner from "@/components/barcode-scanner";
 import type { User, Empresa, Produto, SaidaInput, SaidaParceladaInput, ParcelaInput } from "@shared/schema";
 
 interface ItemSaida {
@@ -37,6 +38,10 @@ export default function Expenses() {
 
   const [parcelas, setParcelas] = useState<ParcelaInput[]>([]);
   const [showParcelas, setShowParcelas] = useState(false);
+  const [isBarcodeScannerOpen, setIsBarcodeScannerOpen] = useState(false);
+  const [selectedItemIndex, setSelectedItemIndex] = useState<number | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showProductSearch, setShowProductSearch] = useState<number | null>(null);
 
   const { toast } = useToast();
 
@@ -51,6 +56,11 @@ export default function Expenses() {
   const { data: produtos } = useQuery<Produto[]>({
     queryKey: ["/api/produtos"],
   });
+
+  // Filtrar produtos baseado no termo de busca
+  const filteredProducts = produtos?.filter(produto => 
+    produto.nome.toLowerCase().includes(searchTerm.toLowerCase())
+  ) || [];
 
   const empresasRecebedoras = empresas?.filter(e => e.tipo === 'recebedora') || [];
 
@@ -112,6 +122,59 @@ export default function Expenses() {
 
   const addItem = () => {
     setItens([...itens, { produtoId: "", quantidade: "1", precoUnitario: "0" }]);
+  };
+
+  const handleBarcodeRead = (barcode: string) => {
+    if (selectedItemIndex !== null) {
+      const produto = produtos?.find(p => p.codigoBarras === barcode);
+      if (produto) {
+        const newItens = [...itens];
+        newItens[selectedItemIndex] = {
+          produtoId: produto.id.toString(),
+          quantidade: "1",
+          precoUnitario: produto.precoUnitario
+        };
+        setItens(newItens);
+        toast({
+          title: "Produto encontrado",
+          description: `${produto.nome} adicionado ao carrinho`,
+        });
+      } else {
+        toast({
+          title: "Produto não encontrado",
+          description: "Código de barras não encontrado no sistema",
+          variant: "destructive",
+        });
+      }
+    }
+    setIsBarcodeScannerOpen(false);
+    setSelectedItemIndex(null);
+  };
+
+  const openBarcodeScanner = (index: number) => {
+    setSelectedItemIndex(index);
+    setIsBarcodeScannerOpen(true);
+  };
+
+  const selectProduct = (produto: Produto, index: number) => {
+    const newItens = [...itens];
+    newItens[index] = {
+      produtoId: produto.id.toString(),
+      quantidade: "1",
+      precoUnitario: produto.precoUnitario
+    };
+    setItens(newItens);
+    setShowProductSearch(null);
+    setSearchTerm("");
+  };
+
+  const selectAllUsers = () => {
+    if (users) {
+      setFormData(prev => ({
+        ...prev,
+        usuariosTitularesIds: users.map(user => user.id)
+      }));
+    }
   };
 
   const removeItem = (index: number) => {
@@ -188,7 +251,8 @@ export default function Expenses() {
     const itensFormatados = itensValidos.map(item => ({
       produtoId: parseInt(item.produtoId),
       quantidade: item.quantidade,
-      precoUnitario: item.precoUnitario
+      precoUnitario: item.precoUnitario,
+      valorTotal: (parseFloat(item.quantidade) * parseFloat(item.precoUnitario)).toFixed(2)
     }));
 
     if (formData.tipoPagamento === 'avista') {
