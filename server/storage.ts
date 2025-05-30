@@ -93,11 +93,11 @@ export class MemStorage implements IStorage {
 
     // Produtos
     const produtos = [
-      { id: 1, codigoBarras: '7896030100123', nome: 'Arroz Branco 5kg', unidade: 'kg', classificacao: 'Alimento', precoUnitario: '12.50' },
-      { id: 2, codigoBarras: '7896030100456', nome: 'Feijão Preto 1kg', unidade: 'kg', classificacao: 'Alimento', precoUnitario: '8.90' },
-      { id: 3, codigoBarras: '7896030100789', nome: 'Óleo de Soja 900ml', unidade: 'ml', classificacao: 'Alimento', precoUnitario: '4.50' },
-      { id: 4, codigoBarras: '7896030100321', nome: 'Leite Integral 1L', unidade: 'L', classificacao: 'Alimento', precoUnitario: '5.80' },
-      { id: 5, codigoBarras: '7896030100654', nome: 'Açúcar Cristal 1kg', unidade: 'kg', classificacao: 'Alimento', precoUnitario: '3.20' }
+      { id: 1, nome: 'Arroz Branco 5kg', codigoBarras: '7896030100123', unidade: 'kg', classificacao: 'Alimento', precoUnitario: '12.50' },
+      { id: 2, nome: 'Feijão Preto 1kg', codigoBarras: '7896030100456', unidade: 'kg', classificacao: 'Alimento', precoUnitario: '8.90' },
+      { id: 3, nome: 'Óleo de Soja 900ml', codigoBarras: '7896030100789', unidade: 'ml', classificacao: 'Alimento', precoUnitario: '4.50' },
+      { id: 4, nome: 'Leite Integral 1L', codigoBarras: '7896030100321', unidade: 'L', classificacao: 'Alimento', precoUnitario: '5.80' },
+      { id: 5, nome: 'Açúcar Cristal 1kg', codigoBarras: '7896030100654', unidade: 'kg', classificacao: 'Alimento', precoUnitario: '3.20' }
     ];
     produtos.forEach(produto => this.produtos.set(produto.id, produto as Produto));
     this.currentProdutoId = 6;
@@ -251,7 +251,11 @@ export class MemStorage implements IStorage {
 
   async createProduto(produto: InsertProduto): Promise<Produto> {
     const id = this.currentProdutoId++;
-    const newProduto: Produto = { ...produto, id };
+    const newProduto: Produto = { 
+      ...produto, 
+      id,
+      codigoBarras: produto.codigoBarras || null
+    };
     this.produtos.set(id, newProduto);
     return newProduto;
   }
@@ -290,7 +294,8 @@ export class MemStorage implements IStorage {
     // Atualizar saldo do usuário
     const user = this.users.get(entrada.usuarioTitularId);
     if (user) {
-      const novoSaldo = parseFloat(user.saldo) + parseFloat(entrada.valor);
+      const saldoAtual = parseFloat(user.saldo || "0");
+      const novoSaldo = saldoAtual + parseFloat(entrada.valor);
       user.saldo = novoSaldo.toFixed(2);
       this.users.set(user.id, user);
     }
@@ -356,7 +361,8 @@ export class MemStorage implements IStorage {
       userIds.forEach((userId: number) => {
         const user = this.users.get(userId);
         if (user) {
-          const novoSaldo = parseFloat(user.saldo) - valorPorUsuario;
+          const saldoAtual = parseFloat(user.saldo || "0");
+          const novoSaldo = saldoAtual - valorPorUsuario;
           user.saldo = novoSaldo.toFixed(2);
           this.users.set(user.id, user);
         }
@@ -482,7 +488,7 @@ export class MemStorage implements IStorage {
     userIds.forEach((userId: number) => {
       const user = this.users.get(userId);
       if (user) {
-        const novoSaldo = parseFloat(user.saldo) - valorPorUsuario;
+        const novoSaldo = parseFloat(user.saldo || "0") - valorPorUsuario;
         user.saldo = novoSaldo.toFixed(2);
         this.users.set(user.id, user);
       }

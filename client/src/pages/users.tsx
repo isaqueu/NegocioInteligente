@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { formatCurrency, getRoleColor, getRoleLabel } from "@/lib/utils";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { User, Plus, Edit, Trash2, Users } from "lucide-react";
+import { User, Plus, Edit, Trash2, Users as UsersIcon } from "lucide-react";
 import UserModal from "@/components/modals/user-modal";
 import type { User as UserType } from "@shared/schema";
 
@@ -120,7 +120,7 @@ export default function Users() {
                       </Badge>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {formatCurrency(user.saldo)}
+                      {formatCurrency(user.saldo || "0")}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
@@ -149,7 +149,7 @@ export default function Users() {
             </table>
             {(!users || users.length === 0) && (
               <div className="text-center py-12">
-                <Users className="mx-auto h-12 w-12 text-gray-400" />
+                <UsersIcon className="mx-auto h-12 w-12 text-gray-400" />
                 <h3 className="mt-2 text-sm font-medium text-gray-900">Nenhum usuário</h3>
                 <p className="mt-1 text-sm text-gray-500">
                   Comece criando um novo usuário.
