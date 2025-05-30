@@ -70,13 +70,10 @@ export default function Expenses() {
       queryClient.invalidateQueries({ queryKey: ["/api/saidas"] });
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
       queryClient.invalidateQueries({ queryKey: ["/api/relatorios/resumo"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/relatorios/transacoes"] });
-      
       toast({
         title: "Saída registrada",
-        description: "Saída financeira registrada com sucesso",
+        description: "Saída registrada com sucesso",
       });
-
       handleClear();
     },
     onError: () => {
@@ -97,21 +94,25 @@ export default function Expenses() {
   };
 
   const handleUserChange = (userId: number, checked: boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      usuariosTitularesIds: checked
-        ? [...prev.usuariosTitularesIds, userId]
-        : prev.usuariosTitularesIds.filter(id => id !== userId)
-    }));
+    if (checked) {
+      setFormData(prev => ({
+        ...prev,
+        usuariosTitularesIds: [...prev.usuariosTitularesIds, userId]
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        usuariosTitularesIds: prev.usuariosTitularesIds.filter(id => id !== userId)
+      }));
+    }
   };
 
   const handleItemChange = (index: number, field: keyof ItemSaida, value: string) => {
     const newItens = [...itens];
     newItens[index] = { ...newItens[index], [field]: value };
 
-    // Auto-fill price when product is selected
     if (field === 'produtoId' && value) {
-      const produto = produtos?.find(p => p.id === parseInt(value));
+      const produto = produtos?.find(p => p.id.toString() === value);
       if (produto) {
         newItens[index].precoUnitario = produto.precoUnitario;
       }
@@ -121,6 +122,15 @@ export default function Expenses() {
   };
 
   const addItem = () => {
+    const hasEmptyItem = itens.some(item => !item.produtoId || !item.quantidade || !item.precoUnitario);
+    if (hasEmptyItem) {
+      toast({
+        title: "Complete os itens",
+        description: "Complete todos os itens antes de adicionar um novo",
+        variant: "destructive",
+      });
+      return;
+    }
     setItens([...itens, { produtoId: "", quantidade: "1", precoUnitario: "0" }]);
   };
 
@@ -190,16 +200,17 @@ export default function Expenses() {
   };
 
   const generateParcelas = () => {
-    const numeroParcelas = parseInt(formData.numeroParcelas);
-    const total = calculateTotal();
-    const valorParcela = total / numeroParcelas;
-    const primeiraParcela = new Date(formData.dataPrimeiraParcela);
+    if (!formData.numeroParcelas || !formData.dataPrimeiraParcela) return;
+
+    const numParcelas = parseInt(formData.numeroParcelas);
+    const valorParcela = calculateTotal() / numParcelas;
+    const dataInicial = new Date(formData.dataPrimeiraParcela);
 
     const novasParcelas: ParcelaInput[] = [];
-    for (let i = 0; i < numeroParcelas; i++) {
-      const dataVencimento = addMonths(primeiraParcela, i);
+    for (let i = 0; i < numParcelas; i++) {
+      const dataVencimento = addMonths(dataInicial, i);
       novasParcelas.push({
-        valor: valorParcela,
+        valor: parseFloat(valorParcela.toFixed(2)),
         dataVencimento: dataVencimento.toISOString().split('T')[0]
       });
     }
@@ -269,6 +280,7 @@ export default function Expenses() {
         tipoPagamento: 'avista',
         observacao: formData.observacao || null,
         usuarioRegistroId: currentUser.id,
+        valorTotal: calculateTotal().toFixed(2),
         itens: itensFormatados,
       };
 
@@ -290,6 +302,7 @@ export default function Expenses() {
         tipoPagamento: 'parcelado',
         observacao: formData.observacao || null,
         usuarioRegistroId: currentUser.id,
+        valorTotal: calculateTotal().toFixed(2),
         numeroParcelas: parseInt(formData.numeroParcelas),
         dataPrimeiraParcela: formData.dataPrimeiraParcela,
         parcelas,
@@ -509,57 +522,72 @@ export default function Expenses() {
                     <Label htmlFor="empresaId" className="text-sm font-medium text-gray-700">
                       Empresa Recebedora
                     </Label>
-                  <Select
-                    value={formData.empresaId}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, empresaId: value }))}
-                  >
-                    <SelectTrigger className="mt-2">
-                      <SelectValue placeholder="Selecione a empresa" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {empresasRecebedoras.map((empresa) => (
-                        <SelectItem key={empresa.id} value={empresa.id.toString()}>
-                          {empresa.nome}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    <Select
+                      value={formData.empresaId}
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, empresaId: value }))}
+                    >
+                      <SelectTrigger className="mt-2">
+                        <SelectValue placeholder="Selecione a empresa" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {empresasRecebedoras.map((empresa) => (
+                          <SelectItem key={empresa.id} value={empresa.id.toString()}>
+                            {empresa.nome}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label htmlFor="dataSaida" className="text-sm font-medium text-gray-700">
-                    Data da Saída
-                  </Label>
-                  <Input
-                    id="dataSaida"
-                    type="date"
-                    value={formData.dataSaida}
-                    onChange={(e) => setFormData(prev => ({ ...prev, dataSaida: e.target.value }))}
-                    className="mt-2"
-                    required
-                  />
+                  <div>
+                    <Label htmlFor="dataSaida" className="text-sm font-medium text-gray-700">
+                      Data da Saída
+                    </Label>
+                    <Input
+                      id="dataSaida"
+                      type="date"
+                      value={formData.dataSaida}
+                      onChange={(e) => setFormData(prev => ({ ...prev, dataSaida: e.target.value }))}
+                      className="mt-2"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="tipoPagamento" className="text-sm font-medium text-gray-700">
+                      Tipo de Pagamento
+                    </Label>
+                    <Select
+                      value={formData.tipoPagamento}
+                      onValueChange={(value: "avista" | "parcelado") => 
+                        setFormData(prev => ({ ...prev, tipoPagamento: value }))
+                      }
+                    >
+                      <SelectTrigger className="mt-2">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="avista">À Vista</SelectItem>
+                        <SelectItem value="parcelado">Parcelado</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
                 <div>
-                  <Label htmlFor="tipoPagamento" className="text-sm font-medium text-gray-700">
-                    Tipo de Pagamento
+                  <Label htmlFor="observacao" className="text-sm font-medium text-gray-700">
+                    Observações
                   </Label>
-                  <Select
-                    value={formData.tipoPagamento}
-                    onValueChange={(value: "avista" | "parcelado") => 
-                      setFormData(prev => ({ ...prev, tipoPagamento: value }))
-                    }
-                  >
-                    <SelectTrigger className="mt-2">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="avista">À Vista</SelectItem>
-                      <SelectItem value="parcelado">Parcelado</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Textarea
+                    id="observacao"
+                    value={formData.observacao}
+                    onChange={(e) => setFormData(prev => ({ ...prev, observacao: e.target.value }))}
+                    placeholder="Observações sobre a saída..."
+                    className="mt-2"
+                    rows={3}
+                  />
                 </div>
               </div>
 
@@ -604,27 +632,29 @@ export default function Expenses() {
                         Previsão das Parcelas
                       </h4>
                       <div className="bg-gray-50 rounded-lg p-4 max-h-60 overflow-y-auto">
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                           {parcelas.map((parcela, index) => (
-                            <div key={index} className="flex justify-between items-center p-2 bg-white rounded border">
-                              <div>
-                                <span className="font-medium">
-                                  Parcela {index + 1}/{parcelas.length}
-                                </span>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <Input
-                                  type="date"
-                                  value={parcela.dataVencimento}
-                                  onChange={(e) => updateParcela(index, 'dataVencimento', e.target.value)}
-                                  className="w-40"
-                                />
+                            <div key={index} className="flex items-center space-x-4 bg-white p-3 rounded">
+                              <span className="w-16 text-sm font-medium text-gray-600">
+                                {index + 1}ª
+                              </span>
+                              <div className="flex-1">
+                                <Label className="text-xs text-gray-500">Valor</Label>
                                 <Input
                                   type="number"
                                   step="0.01"
                                   value={parcela.valor}
                                   onChange={(e) => updateParcela(index, 'valor', parseFloat(e.target.value))}
-                                  className="w-24 text-right"
+                                  className="mt-1"
+                                />
+                              </div>
+                              <div className="flex-1">
+                                <Label className="text-xs text-gray-500">Vencimento</Label>
+                                <Input
+                                  type="date"
+                                  value={parcela.dataVencimento}
+                                  onChange={(e) => updateParcela(index, 'dataVencimento', e.target.value)}
+                                  className="mt-1"
                                 />
                               </div>
                             </div>
@@ -636,77 +666,11 @@ export default function Expenses() {
                 </div>
               )}
 
-              {/* Items Section */}
-
-                        <div>
-                          <Label className="block text-sm font-medium text-gray-700 mb-1">
-                            Quantidade
-                          </Label>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={item.quantidade}
-                            onChange={(e) => handleItemChange(index, 'quantidade', e.target.value)}
-                          />
-                        </div>
-                        <div>
-                          <Label className="block text-sm font-medium text-gray-700 mb-1">
-                            Preço Unitário
-                          </Label>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={item.precoUnitario}
-                            onChange={(e) => handleItemChange(index, 'precoUnitario', e.target.value)}
-                          />
-                        </div>
-                        <div className="flex items-end">
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            onClick={() => removeItem(index)}
-                            disabled={itens.length === 1}
-                            className="w-full"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Total */}
-              <div className="border-t border-gray-200 pt-6">
-                <div className="flex justify-between items-center text-xl font-bold">
-                  <span>Total:</span>
-                  <span className="text-primary">{formatCurrency(calculateTotal())}</span>
-                </div>
-              </div>
-
-              {/* Observação */}
-              <div>
-                <Label htmlFor="observacao" className="text-sm font-medium text-gray-700">
-                  Observação (Opcional)
-                </Label>
-                <Textarea
-                  id="observacao"
-                  rows={3}
-                  value={formData.observacao}
-                  onChange={(e) => setFormData(prev => ({ ...prev, observacao: e.target.value }))}
-                  placeholder="Observações sobre a compra..."
-                  className="mt-2"
-                />
-              </div>
-
-              <div className="flex gap-4">
+              <div className="flex space-x-4 pt-6">
                 <Button
                   type="submit"
-                  className="flex-1 bg-primary hover:bg-blue-700"
                   disabled={createMutation.isPending}
+                  className="flex-1 bg-primary hover:bg-blue-700"
                 >
                   {createMutation.isPending ? (
                     <>
@@ -725,7 +689,6 @@ export default function Expenses() {
                 >
                   Limpar
                 </Button>
-              </div>
               </div>
             </form>
           </CardContent>
