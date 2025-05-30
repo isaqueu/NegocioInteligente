@@ -503,7 +503,7 @@ export class MemStorage implements IStorage {
   // Relatórios
   async getResumoFinanceiro(): Promise<ResumoFinanceiro> {
     const users = Array.from(this.users.values());
-    const saldoFamiliar = users.reduce((total, user) => total + parseFloat(user.saldo), 0);
+    const saldoFamiliar = users.reduce((total, user) => total + parseFloat(user.saldo || "0"), 0);
     
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
@@ -569,7 +569,11 @@ export class MemStorage implements IStorage {
     ];
 
     return transacoes
-      .sort((a, b) => new Date(b.dataHora).getTime() - new Date(a.dataHora).getTime())
+      .sort((a, b) => {
+        const dataB = a.dataHora ? new Date(a.dataHora).getTime() : 0;
+        const dataA = b.dataHora ? new Date(b.dataHora).getTime() : 0;
+        return dataA - dataB;
+      })
       .slice(0, limit);
   }
 }
