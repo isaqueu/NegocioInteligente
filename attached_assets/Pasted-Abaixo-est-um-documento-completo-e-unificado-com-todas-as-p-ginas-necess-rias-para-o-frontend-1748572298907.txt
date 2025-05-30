@@ -1,0 +1,294 @@
+Abaixo está um **documento completo e unificado** com **todas as páginas necessárias para o frontend** do sistema **KIGI – Sistema Financeiro Familiar**, com os **campos, funções, integrações e descrições detalhadas**, pronto para ser usado como prompt para outra IA (por exemplo, uma IA geradora de telas ou código frontend).
+
+Esse documento foca em **texto claro, completo e técnico**, mantendo a ordem cronológica natural de navegação no sistema, incluindo a **lógica de parcelas dentro das saídas financeiras**, conforme solicitado.
+
+---
+
+# 📘 Estrutura Completa do Frontend – KIGI: Sistema Financeiro Familiar
+
+## 🔐 Página de Login
+
+**Objetivo**: Autenticar o usuário via login e senha.
+
+**Campos**:
+
+* `nomeUsuario`: Campo de texto.
+* `senha`: Campo de senha.
+
+**Botões**:
+
+* \[Entrar]
+
+**Funções**:
+
+```ts
+async function autenticarUsuario(nomeUsuario: string, senha: string): Promise<Usuario>
+```
+
+---
+
+## 🏠 Página Inicial / Dashboard
+
+**Objetivo**: Apresentar um resumo da situação financeira da família e dos usuários.
+
+**Componentes**:
+
+* Cartões com:
+
+  * Saldo da família
+  * Saldo por membro
+* Gráfico de gastos por classificação
+* Lista de transações recentes (entradas e saídas)
+* Lista de parcelas pendentes agrupadas por mês
+
+**Funções**:
+
+```ts
+async function obterResumoFinanceiro(): Promise<ResumoFinanceiro>
+async function obterUltimasTransacoes(): Promise<Transacao[]>
+```
+
+---
+
+## 👤 Página de Gestão de Usuários
+
+**Objetivo**: Cadastrar, listar, editar e excluir usuários.
+
+**Campos do formulário**:
+
+* `nome`: Campo de texto
+* `senha`: Campo de senha
+* `papel`: Dropdown com opções `pai`, `mae`, `filho`, `filha`
+
+**Ações**:
+
+* Cadastrar novo usuário
+* Editar usuário existente
+* Excluir usuário
+* Visualizar detalhes
+
+**Funções**:
+
+```ts
+async function listarUsuarios(): Promise<Usuario[]>
+async function criarUsuario(usuario: UsuarioInput): Promise<void>
+async function editarUsuario(id: number, dados: UsuarioInput): Promise<void>
+async function excluirUsuario(id: number): Promise<void>
+```
+
+---
+
+## 💰 Página de Registro de Entrada Financeira
+
+**Objetivo**: Registrar uma entrada (ganho) para um membro da família.
+
+**Campos**:
+
+* `usuarioTitularId`: Seleção do membro da família beneficiado
+* `dataReferencia`: Campo de data
+* `valor`: Campo numérico
+* `empresaPagadoraId`: Dropdown com empresas
+* `dataHoraRegistro`: Preenchido automaticamente
+* `usuarioRegistroId`: Obtido do login
+
+**Funções**:
+
+```ts
+async function listarEmpresas(): Promise<Empresa[]>
+async function registrarEntrada(entrada: EntradaInput): Promise<void>
+```
+
+---
+
+## 💸 Página de Registro de Saída Financeira
+
+**Objetivo**: Registrar uma saída (despesa), que pode ser à vista ou parcelada.
+
+### 🔹 Campos Gerais
+
+* `usuariosTitularesIds`: Seleção múltipla dos usuários que participarão da saída
+* `empresaId`: Empresa recebedora
+* `dataSaida`: Data da saída
+* `tipoPagamento`: 'avista' ou 'parcelado'
+* `observacao`: Campo de texto (opcional)
+* `usuarioRegistroId`: Obtido do login
+* `dataHoraRegistro`: Preenchido automaticamente
+
+### 🔹 Itens da Saída
+
+* Lista dinâmica com:
+
+  * `produtoId`: Seleção via código de barras ou lista
+  * `quantidade`: Número
+  * `precoUnitario`: Preenchido automaticamente com base no produto
+
+### 🔹 Campos Adicionais para Parcelamento
+
+* `numeroParcelas`: Campo numérico
+* `dataPrimeiraParcela`: Campo de data
+
+**Regras**:
+
+* Se `tipoPagamento` for `'parcelado'`, o sistema deve:
+
+  * Dividir o valor total igualmente entre as parcelas (ou com ajuste na última parcela)
+  * Criar uma saída "pai" para controle
+  * Criar N saídas "filhas" (1 por parcela) com os seguintes dados:
+
+    * `saidaOriginalId`: Referência à saída "pai"
+    * `numeroParcela`: 1, 2, ...
+    * `dataVencimento`: baseada na data inicial + meses
+    * `valorParcela`
+    * `status`: `'paga' | 'vencida' | 'a vencer'`
+
+**Funções**:
+
+```ts
+async function listarEmpresas(): Promise<Empresa[]>
+async function listarProdutos(): Promise<Produto[]>
+async function registrarSaida(saida: SaidaInput): Promise<void>
+```
+
+---
+
+## 📦 Página de Cadastro de Produtos/Serviços
+
+**Objetivo**: Gerenciar os produtos e serviços que compõem uma saída.
+
+**Campos**:
+
+* `codigoBarras`: Campo de leitura via câmera (opcional)
+* `nome`: Campo de texto
+* `unidade`: Campo de texto (ex: kg, l, unidade)
+* `classificacao`: Campo de texto ou seleção (alimento, saúde, etc.)
+* `precoUnitario`: Campo numérico
+
+**Ações**:
+
+* Leitura automática por código de barras
+* Cadastro, edição e exclusão
+
+**Funções**:
+
+```ts
+async function listarProdutos(): Promise<Produto[]>
+async function criarProduto(produto: ProdutoInput): Promise<void>
+async function editarProduto(id: number, dados: ProdutoInput): Promise<void>
+async function excluirProduto(id: number): Promise<void>
+```
+
+---
+
+## 🏢 Página de Cadastro de Empresas
+
+**Objetivo**: Gerenciar empresas envolvidas (pagadoras ou recebedoras).
+
+**Campos**:
+
+* `nome`: Campo de texto
+
+**Ações**:
+
+* Cadastro, edição, exclusão
+
+**Funções**:
+
+```ts
+async function listarEmpresas(): Promise<Empresa[]>
+async function criarEmpresa(empresa: EmpresaInput): Promise<void>
+async function editarEmpresa(id: number, dados: EmpresaInput): Promise<void>
+async function excluirEmpresa(id: number): Promise<void>
+```
+
+---
+
+## 📆 Página de Controle de Parcelas
+
+**Objetivo**: Visualizar e controlar o pagamento de parcelas geradas automaticamente.
+
+**Componentes**:
+
+* Lista de parcelas agrupadas por mês
+* Filtros por status (paga, vencida, a vencer)
+* Campo de data de pagamento
+* Botão "Marcar como paga"
+
+**Funções**:
+
+```ts
+async function listarParcelasPendentes(): Promise<Parcela[]>
+async function registrarPagamentoParcela(parcelaId: number, dataPagamento: Date): Promise<void>
+```
+
+---
+
+## 📊 Página de Relatórios
+
+**Objetivo**: Visualizar dados filtrados com agrupamentos e gráficos.
+
+**Filtros**:
+
+* Data inicial / final
+* Usuário
+* Empresa
+* Tipo: entrada ou saída
+* Forma de pagamento: à vista ou parcelado
+* Classificação do produto/serviço
+
+**Componentes**:
+
+* Tabela de transações
+* Saldo por membro da família
+* Gráfico de gastos por classificação
+* Exportar CSV/PDF (opcional)
+
+**Funções**:
+
+```ts
+async function gerarRelatorio(filtros: FiltrosRelatorio): Promise<RelatorioFinanceiro>
+```
+
+---
+
+## 🚪 Página de Logout
+
+**Objetivo**: Encerrar sessão do usuário e limpar estado local.
+
+**Ação**:
+
+* Redireciona para login
+
+**Função**:
+
+```ts
+function logout(): void
+```
+
+---
+
+## 📦 Componentes Reutilizáveis
+
+**LeitorCodigoBarras**
+
+* Componente com acesso à câmera do dispositivo
+* Retorna o código escaneado
+
+```ts
+function LeitorCodigoBarras({ onScan }: { onScan: (codigo: string) => void }): JSX.Element
+```
+
+**SelecionarUsuarios**
+
+* Lista de checkboxes para seleção múltipla de membros da família
+
+**TabelaItensSaida**
+
+* Tabela dinâmica de produtos/serviços com opções de adicionar/remover
+
+**ResumoFinanceiroCard**
+
+* Card com o saldo total ou individual
+
+**StatusParcelaTag**
+
+* Badge de status: `paga`, `vencida`, `a vencer`
