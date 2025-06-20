@@ -14,7 +14,7 @@ import {
   Download,
   Filter
 } from "lucide-react";
-import type { User, ResumoFinanceiro } from "@shared/schema";
+import { Usuario, ResumoFinanceiro } from "../../types";
 
 // Removido: interface TransacaoRelatorio - usando Transacao do types.ts
 
@@ -27,16 +27,24 @@ export default function Reports() {
     paymentType: "todos",
   });
 
-  const { data: resumo } = useQuery<ResumoFinanceiro>({
-    queryKey: ["/api/relatorios/resumo"],
+  const { data: resumo } = useQuery({
+    queryKey: ["financial-summary"],
+    queryFn: reportService.getFinancialSummary,
   });
 
-  const { data: transacoes } = useQuery<TransacaoRelatorio[]>({
-    queryKey: ["/api/relatorios/transacoes", { limit: 50 }],
+  const { data: transacoes } = useQuery({
+    queryKey: ["recent-transactions"],
+    queryFn: () => reportService.getRecentTransactions(50),
   });
 
-  const { data: users } = useQuery<User[]>({
-    queryKey: ["/api/users"],
+  const { data: users } = useQuery({
+    queryKey: ["users"],
+    queryFn: userService.getAll,
+  });
+
+  const { data: empresas } = useQuery({
+    queryKey: ["companies"],
+    queryFn: companyService.getAll,
   });
 
   const handleExportCSV = () => {

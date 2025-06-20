@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
+import { userService, companyService, incomeService } from "@/service/apiService";
 import { useToast } from "@/hooks/use-toast";
 import { authService } from "@/lib/auth";
 import { Loader2 } from "lucide-react";
-import type { User, Empresa, InsertEntrada } from "@shared/schema";
+import { Usuario, Empresa, EntradaInput } from "../../types";
 
 export default function Income() {
   const [formData, setFormData] = useState({
@@ -21,23 +22,23 @@ export default function Income() {
 
   const { toast } = useToast();
 
-  const { data: users } = useQuery<User[]>({
-    queryKey: ["/api/users"],
+  const { data: users } = useQuery({
+    queryKey: ["users"],
+    queryFn: userService.getAll,
   });
 
-  const { data: empresas } = useQuery<Empresa[]>({
-    queryKey: ["/api/empresas"],
+  const { data: empresas } = useQuery({
+    queryKey: ["companies"],
+    queryFn: companyService.getAll,
   });
-
-  const empresasPagadoras = empresas?.filter(e => e.tipo === 'pagadora') || [];
 
   const createMutation = useMutation({
-    mutationFn: (data: InsertEntrada) => apiRequest("POST", "/api/entradas", data),
+    mutationFn: incomeService.create,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/entradas"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/relatorios/resumo"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/relatorios/transacoes"] });
+      queryClient.invalidateQueries({ queryKey: ["incomes"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["recent-transactions"] });
       
       toast({
         title: "Entrada registrada",

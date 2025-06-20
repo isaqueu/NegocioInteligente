@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
+import { companyService } from "@/service/apiService";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import type { Empresa, InsertEmpresa } from "@shared/schema";
+import { Empresa, EmpresaInput } from "../../../types";
 
 interface CompanyModalProps {
   isOpen: boolean;
@@ -25,29 +26,29 @@ export default function CompanyModal({ isOpen, onClose, company }: CompanyModalP
   const { toast } = useToast();
 
   const createMutation = useMutation({
-    mutationFn: (data: InsertEmpresa) => apiRequest("POST", "/api/empresas", data),
+    mutationFn: companyService.create,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/empresas"] });
+      queryClient.invalidateQueries({ queryKey: ["companies"] });
       toast({
         title: "Empresa criada",
         description: "Empresa criada com sucesso",
       });
       handleClose();
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
         title: "Erro ao criar empresa",
-        description: "Não foi possível criar a empresa",
+        description: error.response?.data?.message || "Não foi possível criar a empresa",
         variant: "destructive",
       });
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<InsertEmpresa> }) =>
-      apiRequest("PUT", `/api/empresas/${id}`, data),
+    mutationFn: ({ id, data }: { id: number; data: Partial<any> }) =>
+      companyService.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/empresas"] });
+      queryClient.invalidateQueries({ queryKey: ["companies"] });
       toast({
         title: "Empresa atualizada",
         description: "Empresa atualizada com sucesso",

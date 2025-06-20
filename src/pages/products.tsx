@@ -4,34 +4,36 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/utils";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
+import { productService } from "@/service/apiService";
 import { useToast } from "@/hooks/use-toast";
 import { Package, Plus, Edit, Trash2 } from "lucide-react";
 import ProductModal from "@/components/modals/product-modal";
-import type { Produto } from "@shared/schema";
+import { Produto } from "../../types";
 
 export default function Products() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Produto | null>(null);
   const { toast } = useToast();
 
-  const { data: products, isLoading } = useQuery<Produto[]>({
-    queryKey: ["/api/produtos"],
+  const { data: products, isLoading } = useQuery({
+    queryKey: ["products"],
+    queryFn: productService.getAll,
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => apiRequest("DELETE", `/api/produtos/${id}`),
+    mutationFn: productService.delete,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/produtos"] });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
       toast({
         title: "Produto excluído",
         description: "Produto excluído com sucesso",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
         title: "Erro ao excluir produto",
-        description: "Não foi possível excluir o produto",
+        description: error.response?.data?.message || "Não foi possível excluir o produto",
         variant: "destructive",
       });
     },

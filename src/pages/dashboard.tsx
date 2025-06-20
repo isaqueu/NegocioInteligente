@@ -16,35 +16,43 @@ import {
   Calendar
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import type { ResumoFinanceiro, Produto, Entrada, Saida, User } from "@shared/schema";
+import { reportService, productService, incomeService, expenseService, userService } from "@/service/apiService";
+import { ResumoFinanceiro, Transacao } from "../../types";
 
 export default function Dashboard() {
-  const { data: resumo, isLoading: resumoLoading } = useQuery<ResumoFinanceiro>({
-    queryKey: ["/api/relatorios/resumo"],
+  const { data: resumo, isLoading: resumoLoading } = useQuery({
+    queryKey: ["financial-summary"],
+    queryFn: reportService.getFinancialSummary,
   });
 
-  const { data: transacoes, isLoading: transacoesLoading } = useQuery<any[]>({
-    queryKey: ["/api/relatorios/transacoes"],
+  const { data: transacoes, isLoading: transacoesLoading } = useQuery({
+    queryKey: ["recent-transactions"],
+    queryFn: () => reportService.getRecentTransactions(10),
   });
 
-  const { data: parcelas, isLoading: parcelasLoading } = useQuery<any[]>({
-    queryKey: ["/api/saidas/parcelas"],
+  const { data: parcelas, isLoading: parcelasLoading } = useQuery({
+    queryKey: ["expenses-with-installments"],
+    queryFn: expenseService.getWithInstallments,
   });
 
-  const { data: produtos } = useQuery<Produto[]>({
-    queryKey: ["/api/produtos"],
+  const { data: produtos } = useQuery({
+    queryKey: ["products"],
+    queryFn: productService.getAll,
   });
 
-  const { data: entradas } = useQuery<Entrada[]>({
-    queryKey: ["/api/entradas"],
+  const { data: entradas } = useQuery({
+    queryKey: ["incomes"],
+    queryFn: incomeService.getAll,
   });
 
-  const { data: saidas } = useQuery<Saida[]>({
-    queryKey: ["/api/saidas"],
+  const { data: saidas } = useQuery({
+    queryKey: ["expenses"],
+    queryFn: expenseService.getAll,
   });
 
-  const { data: users } = useQuery<User[]>({
-    queryKey: ["/api/users"],
+  const { data: users } = useQuery({
+    queryKey: ["users"],
+    queryFn: userService.getAll,
   });
 
   const parcelasPendentes = parcelas?.filter(p => 

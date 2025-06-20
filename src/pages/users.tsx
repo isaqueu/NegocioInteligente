@@ -4,25 +4,26 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency, getRoleColor, getRoleLabel } from "@/lib/utils";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { User, Plus, Edit, Trash2, Users as UsersIcon } from "lucide-react";
 import UserModal from "@/components/modals/user-modal";
-import type { User as UserType } from "@shared/schema";
+import { Usuario } from "../../types";
 
 export default function Users() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<UserType | null>(null);
+  const [editingUser, setEditingUser] = useState<Usuario | null>(null);
   const { toast } = useToast();
 
-  const { data: users, isLoading } = useQuery<UserType[]>({
-    queryKey: ["/api/users"],
+  const { data: users, isLoading } = useQuery({
+    queryKey: ["users"],
+    queryFn: userService.getAll,
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => apiRequest("DELETE", `/api/users/${id}`),
+    mutationFn: userService.delete,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
       toast({
         title: "Usuário excluído",
         description: "Usuário excluído com sucesso",

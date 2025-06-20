@@ -3,25 +3,26 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Building, Plus, Edit, Trash2 } from "lucide-react";
 import CompanyModal from "@/components/modals/company-modal";
-import type { Empresa } from "@shared/schema";
+import { Empresa } from "../../types";
 
 export default function Companies() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCompany, setEditingCompany] = useState<Empresa | null>(null);
   const { toast } = useToast();
 
-  const { data: companies, isLoading } = useQuery<Empresa[]>({
-    queryKey: ["/api/empresas"],
+  const { data: companies, isLoading } = useQuery({
+    queryKey: ["companies"],
+    queryFn: companyService.getAll,
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => apiRequest("DELETE", `/api/empresas/${id}`),
+    mutationFn: companyService.delete,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/empresas"] });
+      queryClient.invalidateQueries({ queryKey: ["companies"] });
       toast({
         title: "Empresa excluída",
         description: "Empresa excluída com sucesso",

@@ -4,11 +4,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
+import { productService } from "@/service/apiService";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Camera } from "lucide-react";
 import BarcodeScanner from "@/components/barcode-scanner";
-import type { Produto, InsertProduto } from "@shared/schema";
+import { Produto, ProdutoInput } from "../../../types";
 
 interface ProductModalProps {
   isOpen: boolean;
@@ -29,29 +30,29 @@ export default function ProductModal({ isOpen, onClose, product }: ProductModalP
   const { toast } = useToast();
 
   const createMutation = useMutation({
-    mutationFn: (data: InsertProduto) => apiRequest("POST", "/api/produtos", data),
+    mutationFn: productService.create,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/produtos"] });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
       toast({
         title: "Produto criado",
         description: "Produto criado com sucesso",
       });
       handleClose();
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
         title: "Erro ao criar produto",
-        description: "Não foi possível criar o produto",
+        description: error.response?.data?.message || "Não foi possível criar o produto",
         variant: "destructive",
       });
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<InsertProduto> }) =>
-      apiRequest("PUT", `/api/produtos/${id}`, data),
+    mutationFn: ({ id, data }: { id: number; data: Partial<any> }) =>
+      productService.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/produtos"] });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
       toast({
         title: "Produto atualizado",
         description: "Produto atualizado com sucesso",

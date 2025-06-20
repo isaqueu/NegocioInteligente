@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
+import { userService } from "@/service/apiService";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import type { User, InsertUser } from "@shared/schema";
+import { Usuario, UsuarioInput } from "../../../types";
 
 interface UserModalProps {
   isOpen: boolean;
@@ -27,29 +28,29 @@ export default function UserModal({ isOpen, onClose, user }: UserModalProps) {
   const { toast } = useToast();
 
   const createMutation = useMutation({
-    mutationFn: (data: InsertUser) => apiRequest("POST", "/api/users", data),
+    mutationFn: userService.create,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
       toast({
         title: "Usuário criado",
         description: "Usuário criado com sucesso",
       });
       handleClose();
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
         title: "Erro ao criar usuário",
-        description: "Não foi possível criar o usuário",
+        description: error.response?.data?.message || "Não foi possível criar o usuário",
         variant: "destructive",
       });
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<InsertUser> }) =>
-      apiRequest("PUT", `/api/users/${id}`, data),
+    mutationFn: ({ id, data }: { id: number; data: Partial<any> }) =>
+      userService.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
       toast({
         title: "Usuário atualizado",
         description: "Usuário atualizado com sucesso",

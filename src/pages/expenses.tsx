@@ -7,13 +7,14 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
+import { userService, companyService, productService, expenseService } from "@/service/apiService";
 import { useToast } from "@/hooks/use-toast";
 import { authService } from "@/lib/auth";
 import { formatCurrency, addMonths } from "@/lib/utils";
 import { Loader2, Plus, Trash2, QrCode, Search, Users } from "lucide-react";
 import BarcodeScanner from "@/components/barcode-scanner";
-import type { User, Empresa, Produto, SaidaInput, SaidaParceladaInput, ParcelaInput } from "@shared/schema";
+import { Usuario, Empresa, Produto, SaidaInput, ItemSaidaInput } from "../../types";
 
 interface ItemSaidaForm {
   produtoId: string;
@@ -32,11 +33,11 @@ export default function Expenses() {
     dataPrimeiraParcela: new Date().toISOString().split('T')[0],
   });
 
-  const [itens, setItens] = useState<ItemSaida[]>([
+  const [itens, setItens] = useState<ItemSaidaForm[]>([
     { produtoId: "", quantidade: "1", precoUnitario: "0" }
   ]);
 
-  const [parcelas, setParcelas] = useState<ParcelaInput[]>([]);
+  const [parcelas, setParcelas] = useState<any[]>([]);
   const [showParcelas, setShowParcelas] = useState(false);
   const [isBarcodeScannerOpen, setIsBarcodeScannerOpen] = useState(false);
   const [selectedItemIndex, setSelectedItemIndex] = useState<number | null>(null);
@@ -45,45 +46,61 @@ export default function Expenses() {
 
   const { toast } = useToast();
 
-  const { data: users } = useQuery<User[]>({
-    queryKey: ["/api/users"],
+  const { data: users } = useQuery({
+    queryKey: ["users"],
+    queryFn: userService.getAll,
   });
 
-  const { data: empresas } = useQuery<Empresa[]>({
-    queryKey: ["/api/empresas"],
+  const { data: empresas } = useQuery({
+    queryKey: ["companies"],
+    queryFn: companyService.getAll,
   });
 
-  const { data: produtos } = useQuery<Produto[]>({
-    queryKey: ["/api/produtos"],
+  const { data: produtos } = useQuery({
+    queryKey: ["products"],
+    queryFn: productService.getAll,
   });
+
+  const createMutation = useMutation({
+    mutationFn: expenseService.create,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["recent-transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["expenses-with-installments"] });
+      
+      toast({
+        title: "Saída registrada",
+        description: "Saída financeira registrada com sucesso",
+      });
+
+      // Reset form
+      setFormData({
+        usuariosTitularesIds: [],
+        empresaId: "",
+        dataSaida: new Date().toISOString().split('T')[0],
+        tipoPagamento: "avista",
+        observacao: "",
+        numeroParcelas: "",
+        dataPrimeiraParcela: new Date().toISOString().split('T')[0],
+      });
+      setItens([{ produtoId: "", quantidade: "1", precoUnitario: "0" }]);
+      setParcelas([]);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao registrar saída",
+        description: error.response?.data?.message || "Não foi possível registrar a saída",
+        variant: "destructive",
+      });
+    },
+  });
+
 
   // Filtrar produtos baseado no termo de busca
   const filteredProducts = produtos?.filter(produto => 
     produto.nome.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
-
-  const empresasRecebedoras = empresas?.filter(e => e.tipo === 'recebedora') || [];
-
-  const createMutation = useMutation({
-    mutationFn: (data: SaidaInput) => apiRequest("POST", "/api/saidas", data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/saidas"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/relatorios/resumo"] });
-      toast({
-        title: "Saída registrada",
-        description: "Saída registrada com sucesso",
-      });
-      handleClear();
-    },
-    onError: () => {
-      toast({
-        title: "Erro ao registrar saída",
-        description: "Não foi possível registrar a saída",
-        variant: "destructive",
-      });
-    },
-  });
 
   const calculateTotal = () => {
     return itens.reduce((total, item) => {
@@ -107,14 +124,14 @@ export default function Expenses() {
     }
   };
 
-  const handleItemChange = (index: number, field: keyof ItemSaida, value: string) => {
+  const handleItemChange = (index: number, field: keyof ItemSaidaForm, value: string) => {
     const newItens = [...itens];
     newItens[index] = { ...newItens[index], [field]: value };
 
     if (field === 'produtoId' && value) {
       const produto = produtos?.find(p => p.id.toString() === value);
       if (produto) {
-        newItens[index].precoUnitario = produto.precoUnitario;
+        newItens[index].precoUnitario = produto.precoUnitario.toString();
       }
     }
 

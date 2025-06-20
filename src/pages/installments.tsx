@@ -7,10 +7,11 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency, formatDate, getStatusBadgeColor, getStatusLabel } from "@/lib/utils";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
+import { installmentService, userService } from "@/service/apiService";
 import { useToast } from "@/hooks/use-toast";
 import { Calendar, Check, Edit3, Filter } from "lucide-react";
-import type { Saida, User } from "@shared/schema";
+import { Saida, Usuario } from "../../types";
 
 export default function Installments() {
   const [filters, setFilters] = useState({
@@ -21,30 +22,32 @@ export default function Installments() {
 
   const { toast } = useToast();
 
-  const { data: parcelas, isLoading } = useQuery<Saida[]>({
-    queryKey: ["/api/saidas/parcelas"],
+  const { data: parcelas, isLoading } = useQuery({
+    queryKey: ["expenses-with-installments"],
+    queryFn: () => installmentService.getAll(),
   });
 
-  const { data: users } = useQuery<User[]>({
-    queryKey: ["/api/users"],
+  const { data: users } = useQuery({
+    queryKey: ["users"],
+    queryFn: () => userService.getAll(),
   });
 
   const marcarPagaMutation = useMutation({
     mutationFn: ({ id, dataPagamento }: { id: number; dataPagamento: string }) =>
-      apiRequest("PATCH", `/api/saidas/${id}/pagar`, { dataPagamento }),
+      installmentService.markAsPaid(id, dataPagamento),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/parcelas"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/relatorios/resumo"] });
+      queryClient.invalidateQueries({ queryKey: ["installments"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
       toast({
         title: "Parcela marcada como paga",
         description: "Parcela atualizada com sucesso",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
         title: "Erro ao marcar parcela",
-        description: "Não foi possível marcar a parcela como paga",
+        description: error.response?.data?.message || "Não foi possível marcar a parcela como paga",
         variant: "destructive",
       });
     },
