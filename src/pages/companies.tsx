@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { queryClient } from "@/lib/queryClient";
+
 import { useToast } from "@/hooks/use-toast";
 import { Building, Plus, Edit, Trash2 } from "lucide-react";
 import CompanyModal from "@/components/modals/company-modal";
@@ -22,7 +22,8 @@ export default function Companies() {
   const deleteMutation = useMutation({
     mutationFn: companyService.delete,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["companies"] });
+      // Recarregar dados após operação
+      loadCompanies();
       toast({
         title: "Empresa excluída",
         description: "Empresa excluída com sucesso",

@@ -80,10 +80,7 @@ export default function Reports() {
 
   const saldoLiquido = (resumo?.entradasMes || 0) - (resumo?.saidasMes || 0);
 
-  const { isLoading: loading } = useQuery({
-    queryKey: ["reports", filters],
-    queryFn: () => reportService.getFilteredTransactions(filters),
-  });
+  // Loading será gerenciado pelo estado local
 
   const filteredTransactions = transacoes?.filter((transacao) => {
     const matchUser = filters.userId === "todos" || 

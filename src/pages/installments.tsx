@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency, formatDate, getStatusBadgeColor, getStatusLabel } from "@/lib/utils";
-import { queryClient } from "@/lib/queryClient";
+
 import { installmentService, userService } from "@/service/apiService";
 import { useToast } from "@/hooks/use-toast";
 import { Calendar, Check, Edit3, Filter } from "lucide-react";
@@ -36,7 +36,8 @@ export default function Installments() {
     mutationFn: ({ id, dataPagamento }: { id: number; dataPagamento: string }) =>
       installmentService.markAsPaid(id, dataPagamento),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["installments"] });
+      // Recarregar dados após operação
+      loadInstallments();
       queryClient.invalidateQueries({ queryKey: ["users"] });
       queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
       toast({

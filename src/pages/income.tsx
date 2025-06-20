@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { queryClient } from "@/lib/queryClient";
+
 import { userService, companyService, incomeService } from "@/service/apiService";
 import { useToast } from "@/hooks/use-toast";
 import { authService } from "@/lib/auth";
@@ -35,7 +35,8 @@ export default function Income() {
   const createMutation = useMutation({
     mutationFn: incomeService.create,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["incomes"] });
+      // Recarregar dados após operação
+      loadData();
       queryClient.invalidateQueries({ queryKey: ["users"] });
       queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
       queryClient.invalidateQueries({ queryKey: ["recent-transactions"] });

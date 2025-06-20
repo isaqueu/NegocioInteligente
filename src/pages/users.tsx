@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency, getRoleColor, getRoleLabel } from "@/lib/utils";
-import { queryClient } from "@/lib/queryClient";
+
 import { useToast } from "@/hooks/use-toast";
 import { User, Plus, Edit, Trash2, Users as UsersIcon } from "lucide-react";
 import UserModal from "@/components/modals/user-modal";
@@ -23,7 +23,8 @@ export default function Users() {
   const deleteMutation = useMutation({
     mutationFn: userService.delete,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["users"] });
+      // Recarregar dados após operação
+      loadUsers();
       toast({
         title: "Usuário excluído",
         description: "Usuário excluído com sucesso",
