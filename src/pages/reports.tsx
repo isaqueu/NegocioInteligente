@@ -12,7 +12,8 @@ import {
   TrendingDown, 
   BarChart3, 
   Download,
-  Filter
+  Filter,
+  Loader2
 } from "lucide-react";
 import { Usuario, ResumoFinanceiro } from "../../types";
 
@@ -78,6 +79,27 @@ export default function Reports() {
   };
 
   const saldoLiquido = (resumo?.entradasMes || 0) - (resumo?.saidasMes || 0);
+
+  const { isLoading: loading } = useQuery({
+    queryKey: ["reports", filters],
+    queryFn: () => reportService.getFilteredTransactions(filters),
+  });
+
+  const filteredTransactions = transacoes?.filter((transacao) => {
+    const matchUser = filters.userId === "todos" || 
+      transacao.usuarioId?.toString() === filters.userId;
+    const matchType = filters.type === "todos" || transacao.tipo === filters.type;
+    return matchUser && matchType;
+  }) || [];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <Loader2 className="mr-2 h-8 w-8 animate-spin" />
+        <div className="text-lg">Carregando relatórios...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">
