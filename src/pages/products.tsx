@@ -1,12 +1,13 @@
-
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { formatCurrency } from "@/lib/utils";
 import { productService } from "@/service/apiService";
 import { useToast } from "@/hooks/use-toast";
-import { Package, Plus, Edit, Trash2, Loader2 } from "lucide-react";
+import { Package, Plus, Edit, Trash2, Search, Loader2 } from "lucide-react";
 import ProductModal from "@/components/modals/product-modal";
 import { Produto } from "../../types";
 

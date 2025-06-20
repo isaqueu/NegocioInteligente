@@ -27,7 +27,7 @@ export default function Income() {
     queryFn: userService.getAll,
   });
 
-  const { data: empresas } = useQuery({
+  const { data: empresasPagadoras } = useQuery({
     queryKey: ["companies"],
     queryFn: companyService.getAll,
   });
@@ -36,11 +36,11 @@ export default function Income() {
     mutationFn: incomeService.create,
     onSuccess: () => {
       // Recarregar dados após operação
-      loadData();
       queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["companies"] });
       queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
       queryClient.invalidateQueries({ queryKey: ["recent-transactions"] });
-      
+
       toast({
         title: "Entrada registrada",
         description: "Entrada financeira registrada com sucesso",
@@ -65,7 +65,7 @@ export default function Income() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const currentUser = authService.getCurrentUser();
     if (!currentUser) {
       toast({

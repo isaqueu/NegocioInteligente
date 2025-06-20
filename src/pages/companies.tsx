@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-
+import { formatCurrency } from "@/lib/utils";
+import { companyService } from "@/service/apiService";
 import { useToast } from "@/hooks/use-toast";
-import { Building, Plus, Edit, Trash2 } from "lucide-react";
+import { Building2, Plus, Edit, Trash2, Loader2 } from "lucide-react";
 import CompanyModal from "@/components/modals/company-modal";
 import { Empresa } from "../../types";
 
@@ -118,7 +119,7 @@ export default function Companies() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="w-10 h-10 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center mr-3">
-                          <Building className="h-5 w-5 text-primary" />
+                          <Building2 className="h-5 w-5 text-primary" />
                         </div>
                         <div className="text-sm font-medium text-gray-900">
                           {company.nome}
@@ -157,7 +158,7 @@ export default function Companies() {
             </table>
             {(!companies || companies.length === 0) && (
               <div className="text-center py-12">
-                <Building className="mx-auto h-12 w-12 text-gray-400" />
+                <Building2 className="mx-auto h-12 w-12 text-gray-400" />
                 <h3 className="mt-2 text-sm font-medium text-gray-900">Nenhuma empresa</h3>
                 <p className="mt-1 text-sm text-gray-500">
                   Comece criando uma nova empresa.

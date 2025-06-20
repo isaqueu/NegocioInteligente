@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency, getRoleColor, getRoleLabel } from "@/lib/utils";
-
+import { userService } from "@/service/apiService";
 import { useToast } from "@/hooks/use-toast";
 import { User, Plus, Edit, Trash2, Users as UsersIcon } from "lucide-react";
 import UserModal from "@/components/modals/user-modal";
@@ -20,11 +20,13 @@ export default function Users() {
     queryFn: userService.getAll,
   });
 
+  const queryClient = useQueryClient();
+
   const deleteMutation = useMutation({
     mutationFn: userService.delete,
     onSuccess: () => {
       // Recarregar dados após operação
-      loadUsers();
+      queryClient.invalidateQueries({ queryKey: ["users"] });
       toast({
         title: "Usuário excluído",
         description: "Usuário excluído com sucesso",

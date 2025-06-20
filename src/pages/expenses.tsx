@@ -1,18 +1,16 @@
 import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Textarea } from "@/components/ui/textarea";
-import { userService, companyService, productService, expenseService } from "@/service/apiService";
-import { useToast } from "@/hooks/use-toast";
+import { formatCurrency } from "@/lib/utils";
 import { authService } from "@/lib/auth";
-import { formatCurrency, addMonths } from "@/lib/utils";
-import { Loader2, Plus, Trash2, QrCode, Search, Users } from "lucide-react";
-import BarcodeScanner from "@/components/barcode-scanner";
-import { Usuario, Empresa, Produto, SaidaInput, ItemSaidaInput } from "../../types";
+import { userService, productService, expenseService } from "@/service/apiService";
+import { useToast } from "@/hooks/use-toast";
+import { Plus, Trash2, ShoppingCart, Search } from "lucide-react";
+import { Usuario, Produto, SaidaInput, ItemSaida } from "../../types";
 
 export default function Expenses() {
   const [users, setUsers] = useState<Usuario[]>([]);
