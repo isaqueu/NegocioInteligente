@@ -114,16 +114,14 @@ export default function Sidebar() {
                       <ul className="mt-1 ml-6 space-y-1">
                         {item.children.map((child: any) => (
                           <li key={child.name}>
-                            <Link href={child.href}>
-                              <span className={cn(
-                                "block px-3 py-2 text-sm rounded-lg transition-colors cursor-pointer",
-                                location === child.href
-                                  ? "bg-green-600 text-white"
-                                  : "text-gray-400 hover:bg-gray-800 hover:text-white"
-                              )}>
-                                {child.name}
-                              </span>
-                            </Link>
+                            <Link href={child.href} className={`flex items-center w-full px-3 py-2 text-sm rounded-lg transition-colors ${
+                          location === child.href
+                            ? 'bg-green-600 text-white' 
+                            : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                        }`}>
+                          <child.icon className="h-4 w-4 mr-3" />
+                          {child.name}
+                        </Link>
                           </li>
                         ))}
                       </ul>
@@ -131,21 +129,19 @@ export default function Sidebar() {
                   </div>
                 ) : (
                   // Simple menu item
-                  <Link href={item.href || "#"}>
-                    <span className={cn(
-                      "flex items-center px-3 py-2 text-sm rounded-lg transition-colors relative cursor-pointer",
-                      isActive 
-                        ? "bg-green-600 text-white" 
-                        : "text-gray-300 hover:bg-gray-800 hover:text-white"
-                    )}>
-                      <item.icon className="mr-3 h-4 w-4" />
-                      {item.name}
-                      {item.badge && (
-                        <span className="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-0.5 min-w-[20px] text-center">
-                          {item.badge}
-                        </span>
-                      )}
-                    </span>
+                  <Link href={item.href || "#"} className={cn(
+                    "flex items-center px-3 py-2 text-sm rounded-lg transition-colors relative cursor-pointer",
+                    isActive 
+                      ? "bg-green-600 text-white" 
+                      : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                  )}>
+                    <item.icon className="mr-3 h-4 w-4" />
+                    {item.name}
+                    {item.badge && (
+                      <span className="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-0.5 min-w-[20px] text-center">
+                        {item.badge}
+                      </span>
+                    )}
                   </Link>
                 )}
               </li>

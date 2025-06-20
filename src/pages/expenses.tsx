@@ -68,7 +68,7 @@ export default function Expenses() {
       queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
       queryClient.invalidateQueries({ queryKey: ["recent-transactions"] });
       queryClient.invalidateQueries({ queryKey: ["expenses-with-installments"] });
-      
+
       toast({
         title: "Saída registrada",
         description: "Saída financeira registrada com sucesso",
@@ -252,7 +252,7 @@ export default function Expenses() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const currentUser = authService.getCurrentUser();
     if (!currentUser) {
       toast({
@@ -345,6 +345,8 @@ export default function Expenses() {
     setShowParcelas(false);
   };
 
+  const empresasRecebedoras = empresas || [];
+
   return (
     <div className="p-6">
       <div className="mb-8">
@@ -370,7 +372,7 @@ export default function Expenses() {
                     Adicionar Item
                   </Button>
                 </div>
-                
+
                 <div className="space-y-4">
                   {itens.map((item, index) => (
                     <div key={index} className="p-4 border border-gray-200 rounded-lg">
@@ -409,7 +411,7 @@ export default function Expenses() {
                                   <Search className="h-4 w-4" />
                                 </Button>
                               </div>
-                              
+
                               {showProductSearch === index && searchTerm && (
                                 <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
                                   {filteredProducts.slice(0, 10).map((produto) => (
@@ -434,7 +436,7 @@ export default function Expenses() {
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="md:col-span-2">
                           <Label className="text-sm font-medium text-gray-700">Quantidade</Label>
                           <Input
@@ -446,7 +448,7 @@ export default function Expenses() {
                             className="mt-2"
                           />
                         </div>
-                        
+
                         <div className="md:col-span-2">
                           <Label className="text-sm font-medium text-gray-700">Preço Unitário</Label>
                           <Input
@@ -458,14 +460,14 @@ export default function Expenses() {
                             className="mt-2"
                           />
                         </div>
-                        
+
                         <div className="md:col-span-2">
                           <Label className="text-sm font-medium text-gray-700">Total</Label>
                           <div className="mt-2 p-2 bg-gray-50 rounded border text-center font-medium">
                             {formatCurrency((parseFloat(item.quantidade) * parseFloat(item.precoUnitario)).toFixed(2))}
                           </div>
                         </div>
-                        
+
                         <div className="md:col-span-1">
                           {itens.length > 1 && (
                             <Button
@@ -498,7 +500,7 @@ export default function Expenses() {
               {/* Informações Complementares da Saída */}
               <div className="space-y-6">
                 <h3 className="text-lg font-semibold text-gray-800">Informações Complementares</h3>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <Label className="text-sm font-medium text-gray-700 mb-2 block">
@@ -720,3 +722,4 @@ export default function Expenses() {
     </div>
   );
 }
+// The code was analyzed and there were no matches to apply the changes, the original code is returned.
