@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { 
   UsuarioInput, EmpresaInput, ProdutoInput, 
   EntradaInput, SaidaInput
-} from "../client/types";
+} from "../types";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth

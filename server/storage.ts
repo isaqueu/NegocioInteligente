@@ -2,7 +2,7 @@ import {
   Usuario, UsuarioInput, Empresa, EmpresaInput, Produto, ProdutoInput, 
   Entrada, EntradaInput, Saida, SaidaInput, ItemSaida, ItemSaidaInput,
   ResumoFinanceiro, Parcela, ParcelaInput, Transacao
-} from "../client/types";
+} from "../types";
 
 export interface IStorage {
   // Users
