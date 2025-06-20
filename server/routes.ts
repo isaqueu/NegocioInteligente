@@ -2,10 +2,9 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { 
-  insertUserSchema, insertEmpresaSchema, insertProdutoSchema, 
-  insertEntradaSchema, SaidaInput 
-} from "@shared/schema";
-import { z } from "zod";
+  UsuarioInput, EmpresaInput, ProdutoInput, 
+  EntradaInput, SaidaInput
+} from "../client/types";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth
@@ -36,14 +35,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/users", async (req, res) => {
     try {
-      const userData = insertUserSchema.parse(req.body);
+      const userData: UsuarioInput = req.body;
       const user = await storage.createUser(userData);
       res.status(201).json(user);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Dados inválidos", errors: error.errors });
-      }
-      res.status(500).json({ message: "Erro ao criar usuário" });
+    } catch (error: any) {
+      res.status(500).json({ message: "Erro ao criar usuário", error: error.message });
     }
   });
 
@@ -83,14 +79,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/empresas", async (req, res) => {
     try {
-      const empresaData = insertEmpresaSchema.parse(req.body);
+      const empresaData: EmpresaInput = req.body;
       const empresa = await storage.createEmpresa(empresaData);
       res.status(201).json(empresa);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Dados inválidos", errors: error.errors });
-      }
-      res.status(500).json({ message: "Erro ao criar empresa" });
+    } catch (error: any) {
+      res.status(500).json({ message: "Erro ao criar empresa", error: error.message });
     }
   });
 
@@ -142,14 +135,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/produtos", async (req, res) => {
     try {
-      const produtoData = insertProdutoSchema.parse(req.body);
+      const produtoData: ProdutoInput = req.body;
       const produto = await storage.createProduto(produtoData);
       res.status(201).json(produto);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Dados inválidos", errors: error.errors });
-      }
-      res.status(500).json({ message: "Erro ao criar produto" });
+    } catch (error: any) {
+      res.status(500).json({ message: "Erro ao criar produto", error: error.message });
     }
   });
 
@@ -189,14 +179,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/entradas", async (req, res) => {
     try {
-      const entradaData = insertEntradaSchema.parse(req.body);
+      const entradaData: EntradaInput = req.body;
       const entrada = await storage.createEntrada(entradaData);
       res.status(201).json(entrada);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Dados inválidos", errors: error.errors });
-      }
-      res.status(500).json({ message: "Erro ao criar entrada" });
+    } catch (error: any) {
+      res.status(500).json({ message: "Erro ao criar entrada", error: error.message });
     }
   });
 

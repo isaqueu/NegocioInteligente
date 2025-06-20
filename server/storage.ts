@@ -183,7 +183,24 @@ export class MemStorage implements IStorage {
       observacao: "Compra parcelada"
     };
     this.saidas.set(2, saida2);
-    this.currentSaidaId = 3;
+    
+    const saida3: Saida = {
+      id: 3,
+      usuarioRegistroId: 1,
+      dataHoraRegistro: "2024-01-20T10:15:00Z",
+      dataSaida: "2024-01-20",
+      empresaId: 2,
+      tipoPagamento: "avista",
+      usuariosTitularesIds: [1, 3],
+      itens: [
+        { produtoId: 1, nomeProduto: "Arroz Branco 5kg", quantidade: 1, precoUnitario: 15.90, total: 15.90 },
+        { produtoId: 3, nomeProduto: "Leite Integral 1L", quantidade: 3, precoUnitario: 4.20, total: 12.60 }
+      ],
+      valorTotal: 28.50,
+      observacao: "Compra familiar"
+    };
+    this.saidas.set(3, saida3);
+    this.currentSaidaId = 4;
 
     // Parcelas
     this.parcelas.set(1, {

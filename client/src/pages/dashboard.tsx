@@ -79,12 +79,20 @@ export default function Dashboard() {
   })) || [];
 
   // Pedidos recentes (baseado em saídas)
-  const pedidosRecentes = saidas?.slice(0, 5).map((saida, index) => ({
-    id: `#${4000 + index}`,
-    cliente: users?.find(u => JSON.parse(saida.usuariosTitularesIds).includes(u.id))?.nome || 'João Silva',
-    status: saida.tipoPagamento === 'avista' ? 'Entregue' : 'Em preparo',
-    total: parseFloat(saida.valorTotal || '0').toFixed(2)
-  })) || [];
+  const pedidosRecentes = saidas?.slice(0, 5).map((saida, index) => {
+    const titularesIds = Array.isArray(saida.usuariosTitularesIds) 
+      ? saida.usuariosTitularesIds 
+      : (typeof saida.usuariosTitularesIds === 'string' 
+          ? JSON.parse(saida.usuariosTitularesIds) 
+          : []);
+    
+    return {
+      id: `#${4000 + index}`,
+      cliente: users?.find(u => titularesIds.includes(u.id))?.nome || 'João Silva',
+      status: saida.tipoPagamento === 'avista' ? 'Entregue' : 'Em preparo',
+      total: saida.valorTotal.toFixed(2)
+    };
+  }) || [];
 
   if (resumoLoading || transacoesLoading || parcelasLoading) {
     return (
@@ -296,7 +304,7 @@ export default function Dashboard() {
                     <tr key={index} className="hover:bg-gray-50">
                       <td className="px-6 py-4 text-sm text-gray-900">{item.produto}</td>
                       <td className="px-6 py-4 text-sm text-gray-500">{item.quantidade}</td>
-                      <td className="px-6 py-4 text-sm font-medium text-gray-900">R$ {item.total}</td>
+                      <td className="px-6 py-4 text-sm font-medium text-gray-900">{item.total}</td>
                     </tr>
                   ))}
                   {produtosMaisVendidos.length === 0 && (
@@ -339,7 +347,7 @@ export default function Dashboard() {
                           {pedido.status}
                         </Badge>
                       </td>
-                      <td className="px-6 py-4 text-sm font-medium text-gray-900">R$ {pedido.total}</td>
+                      <td className="px-6 py-4 text-sm font-medium text-gray-900">{formatCurrency(parseFloat(pedido.total))}</td>
                     </tr>
                   ))}
                   {pedidosRecentes.length === 0 && (
