@@ -1,69 +1,79 @@
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency, getRoleColor, getRoleLabel } from "@/lib/utils";
 import { userService } from "@/service/apiService";
 import { useToast } from "@/hooks/use-toast";
-import { User, Plus, Edit, Trash2, Users as UsersIcon } from "lucide-react";
+import { User, Plus, Edit, Trash2, Users as UsersIcon, Loader2 } from "lucide-react";
 import UserModal from "@/components/modals/user-modal";
 import { Usuario } from "../../types";
 
 export default function Users() {
+  const [users, setUsers] = useState<Usuario[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<Usuario | null>(null);
+  const [deleting, setDeleting] = useState<number | null>(null);
   const { toast } = useToast();
 
-  const { data: users, isLoading } = useQuery({
-    queryKey: ["users"],
-    queryFn: userService.getAll,
-  });
+  useEffect(() => {
+    loadUsers();
+  }, []);
 
-  const queryClient = useQueryClient();
-
-  const deleteMutation = useMutation({
-    mutationFn: userService.delete,
-    onSuccess: () => {
-      // Recarregar dados após operação
-      queryClient.invalidateQueries({ queryKey: ["users"] });
+  const loadUsers = async () => {
+    try {
+      setLoading(true);
+      const data = await userService.getAll();
+      setUsers(data);
+    } catch (error) {
       toast({
-        title: "Usuário excluído",
-        description: "Usuário excluído com sucesso",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Erro ao excluir usuário",
-        description: "Não foi possível excluir o usuário",
+        title: "Erro ao carregar usuários",
+        description: "Não foi possível carregar os usuários",
         variant: "destructive",
       });
-    },
-  });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleEdit = (user: Usuario) => {
     setEditingUser(user);
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id: number) => {
-    if (confirm("Tem certeza que deseja excluir este usuário?")) {
-      deleteMutation.mutate(id);
+  const handleDelete = async (id: number) => {
+    try {
+      setDeleting(id);
+      await userService.delete(id);
+      await loadUsers();
+      toast({
+        title: "Usuário excluído",
+        description: "Usuário excluído com sucesso",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao excluir usuário",
+        description: "Não foi possível excluir o usuário",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleting(null);
     }
   };
 
-  const handleCloseModal = () => {
+  const handleModalClose = () => {
     setIsModalOpen(false);
     setEditingUser(null);
+    loadUsers();
   };
 
-  if (isLoading) {
+  if (loading) {
     return (
-      <div className="p-6">
-        <div className="animate-pulse space-y-6">
-          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-          <div className="h-64 bg-gray-200 rounded-xl"></div>
-        </div>
+      <div className="flex items-center justify-center h-96">
+        <Loader2 className="mr-2 h-8 w-8 animate-spin" />
+        <div className="text-lg">Carregando usuários...</div>
       </div>
     );
   }
@@ -73,13 +83,13 @@ export default function Users() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
         <div>
           <h2 className="text-3xl font-bold text-gray-800 mb-2">Gestão de Usuários</h2>
-          <p className="text-gray-600">Gerenciar membros da família</p>
+          <p className="text-gray-600">Gerencie usuários e suas permissões</p>
         </div>
         <Button
           onClick={() => setIsModalOpen(true)}
-          className="bg-primary hover:bg-blue-700"
+          className="bg-green-600 hover:bg-green-700 text-white"
         >
-          <Plus className="mr-2 h-4 w-4" />
+          <Plus className="h-4 w-4 mr-2" />
           Novo Usuário
         </Button>
       </div>
@@ -88,72 +98,104 @@ export default function Users() {
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50">
+              <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Nome
+                    Usuário
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Papel
+                    Email
                   </th>
-
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Função
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Ações
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {users?.map((user) => (
+                {users.map((user) => (
                   <tr key={user.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="w-10 h-10 bg-primary bg-opacity-10 rounded-full flex items-center justify-center mr-3">
-                          <User className="h-5 w-5 text-primary" />
-                        </div>
+                        <User className="h-8 w-8 text-gray-400 mr-3" />
                         <div>
-                          <div className="text-sm font-medium text-gray-900">{user.nome}</div>
-                          <div className="text-sm text-gray-500">{user.username}</div>
+                          <div className="text-sm font-medium text-gray-900">
+                            {user.nome}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {user.username}
+                          </div>
                         </div>
                       </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {user.email || "Não informado"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <Badge className={getRoleColor(user.papel)}>
-                        {getRoleLabel(user.papel)}
+                      <Badge className={getRoleColor(user.role)}>
+                        {getRoleLabel(user.role)}
                       </Badge>
                     </td>
-
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex space-x-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEdit(user)}
-                          className="text-primary hover:text-blue-700"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDelete(user.id)}
-                          className="text-destructive hover:text-red-700"
-                          disabled={deleteMutation.isPending}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <Badge className={user.ativo ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
+                        {user.ativo ? "Ativo" : "Inativo"}
+                      </Badge>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEdit(user)}
+                        className="text-blue-600 border-blue-600 hover:bg-blue-50"
+                      >
+                        <Edit className="h-4 w-4 mr-1" />
+                        Editar
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDelete(user.id)}
+                        disabled={deleting === user.id}
+                        className="text-red-600 border-red-600 hover:bg-red-50"
+                      >
+                        {deleting === user.id ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                            Excluindo...
+                          </>
+                        ) : (
+                          <>
+                            <Trash2 className="h-4 w-4 mr-1" />
+                            Excluir
+                          </>
+                        )}
+                      </Button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            {(!users || users.length === 0) && (
+            {users.length === 0 && (
               <div className="text-center py-12">
                 <UsersIcon className="mx-auto h-12 w-12 text-gray-400" />
                 <h3 className="mt-2 text-sm font-medium text-gray-900">Nenhum usuário</h3>
                 <p className="mt-1 text-sm text-gray-500">
                   Comece criando um novo usuário.
                 </p>
+                <div className="mt-6">
+                  <Button
+                    onClick={() => setIsModalOpen(true)}
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Novo Usuário
+                  </Button>
+                </div>
               </div>
             )}
           </div>
@@ -162,7 +204,7 @@ export default function Users() {
 
       <UserModal
         isOpen={isModalOpen}
-        onClose={handleCloseModal}
+        onClose={handleModalClose}
         user={editingUser}
       />
     </div>

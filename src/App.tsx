@@ -23,7 +23,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
     // Inicializar autenticação
     authService.initializeFromStorage();
     setIsAuthenticated(authService.isAuthenticated());
-    
+
     const checkAuth = () => setIsAuthenticated(authService.isAuthenticated());
     const interval = setInterval(checkAuth, 1000);
     return () => clearInterval(interval);
