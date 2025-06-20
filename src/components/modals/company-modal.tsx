@@ -1,180 +1,143 @@
-import { useState, useEffect } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useState } from "react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { companyService } from "@/service/apiService";
 import { useToast } from "@/hooks/use-toast";
+import { companyService } from "@/service/apiService";
 import { Empresa, EmpresaInput } from "../../../types";
 
 interface CompanyModalProps {
-  isOpen: boolean;
+  open: boolean;
   onClose: () => void;
-  company?: Empresa | null;
+  company?: Empresa;
+  onSuccess: () => void;
 }
 
-export default function CompanyModal({ isOpen, onClose, company }: CompanyModalProps) {
-  const [formData, setFormData] = useState({
-    nome: "",
-    tipo: "",
-  });
-
+export default function CompanyModal({ open, onClose, company, onSuccess }: CompanyModalProps) {
   const { toast } = useToast();
-
-  const createMutation = useMutation({
-    mutationFn: companyService.create,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["companies"] });
-      toast({
-        title: "Empresa criada",
-        description: "Empresa criada com sucesso",
-      });
-      handleClose();
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Erro ao criar empresa",
-        description: error.response?.data?.message || "Não foi possível criar a empresa",
-        variant: "destructive",
-      });
-    },
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    nomeFantasia: company?.nomeFantasia || "",
+    cnpj: company?.cnpj || "",
+    endereco: company?.endereco || "",
+    telefone: company?.telefone || "",
   });
 
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<any> }) =>
-      companyService.update(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["companies"] });
-      toast({
-        title: "Empresa atualizada",
-        description: "Empresa atualizada com sucesso",
-      });
-      handleClose();
-    },
-    onError: () => {
-      toast({
-        title: "Erro ao atualizar empresa",
-        description: "Não foi possível atualizar a empresa",
-        variant: "destructive",
-      });
-    },
-  });
-
-  useEffect(() => {
-    if (company) {
-      setFormData({
-        nome: company.nome,
-        tipo: company.tipo,
-      });
-    } else {
-      setFormData({
-        nome: "",
-        tipo: "",
-      });
-    }
-  }, [company, isOpen]);
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.nome || !formData.tipo) {
+    if (!formData.nomeFantasia.trim() || !formData.cnpj.trim()) {
       toast({
         title: "Campos obrigatórios",
-        description: "Preencha todos os campos obrigatórios",
+        description: "Nome fantasia e CNPJ são obrigatórios",
         variant: "destructive",
       });
       return;
     }
 
-    const companyData: InsertEmpresa = {
-      nome: formData.nome,
-      tipo: formData.tipo,
-    };
+    try {
+      setLoading(true);
 
-    if (company) {
-      updateMutation.mutate({ id: company.id, data: companyData });
-    } else {
-      createMutation.mutate(companyData);
+      const empresaData: EmpresaInput = {
+        nomeFantasia: formData.nomeFantasia,
+        cnpj: formData.cnpj,
+        endereco: formData.endereco,
+        telefone: formData.telefone,
+      };
+
+      if (company) {
+        await companyService.update(company.id, empresaData);
+        toast({
+          title: "Empresa atualizada",
+          description: "Empresa atualizada com sucesso",
+        });
+      } else {
+        await companyService.create(empresaData);
+        toast({
+          title: "Empresa criada",
+          description: "Empresa criada com sucesso",
+        });
+      }
+
+      onSuccess();
+      onClose();
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: company ? "Erro ao atualizar empresa" : "Erro ao criar empresa",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleClose = () => {
-    setFormData({
-      nome: "",
-      tipo: "",
-    });
-    onClose();
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value });
   };
 
-  const isLoading = createMutation.isPending || updateMutation.isPending;
-
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md">
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>
-            {company ? "Editar Empresa" : "Nova Empresa"}
-          </DialogTitle>
+          <DialogTitle>{company ? "Editar Empresa" : "Nova Empresa"}</DialogTitle>
+          <DialogDescription>
+            {company ? "Edite as informações da empresa" : "Preencha os dados da nova empresa"}
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="nome" className="text-sm font-medium text-gray-700">
-              Nome da Empresa
-            </Label>
+          <div className="space-y-2">
+            <Label htmlFor="nomeFantasia">Nome Fantasia *</Label>
             <Input
-              id="nome"
-              type="text"
-              value={formData.nome}
-              onChange={(e) => setFormData(prev => ({ ...prev, nome: e.target.value }))}
-              className="mt-2"
+              id="nomeFantasia"
+              value={formData.nomeFantasia}
+              onChange={(e) => handleInputChange("nomeFantasia", e.target.value)}
+              placeholder="Digite o nome fantasia"
               required
             />
           </div>
 
-          <div>
-            <Label htmlFor="tipo" className="text-sm font-medium text-gray-700">
-              Tipo
-            </Label>
-            <Select
-              value={formData.tipo}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, tipo: value }))}
-            >
-              <SelectTrigger className="mt-2">
-                <SelectValue placeholder="Selecione o tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="pagadora">Pagadora (fonte de renda)</SelectItem>
-                <SelectItem value="recebedora">Recebedora (destino de gastos)</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="space-y-2">
+            <Label htmlFor="cnpj">CNPJ *</Label>
+            <Input
+              id="cnpj"
+              value={formData.cnpj}
+              onChange={(e) => handleInputChange("cnpj", e.target.value)}
+              placeholder="00.000.000/0000-00"
+              required
+            />
           </div>
 
-          <div className="flex gap-4 mt-6">
-            <Button
-              type="submit"
-              className="flex-1 bg-primary hover:bg-blue-700"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {company ? "Atualizando..." : "Criando..."}
-                </>
-              ) : (
-                company ? "Atualizar" : "Criar"
-              )}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              className="px-6"
-            >
+          <div className="space-y-2">
+            <Label htmlFor="endereco">Endereço</Label>
+            <Input
+              id="endereco"
+              value={formData.endereco}
+              onChange={(e) => handleInputChange("endereco", e.target.value)}
+              placeholder="Digite o endereço"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="telefone">Telefone</Label>
+            <Input
+              id="telefone"
+              value={formData.telefone}
+              onChange={(e) => handleInputChange("telefone", e.target.value)}
+              placeholder="(00) 00000-0000"
+            />
+          </div>
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose}>
               Cancelar
             </Button>
-          </div>
+            <Button type="submit" disabled={loading}>
+              {loading ? "Salvando..." : (company ? "Atualizar" : "Criar")}
+            </Button>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

@@ -1,71 +1,73 @@
-import { useState, useEffect } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+` tags. I will pay close attention to indentation, structure, and completeness.
+
+```
+<replit_final_file>
+import { useState } from "react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { userService } from "@/service/apiService";
 import { useToast } from "@/hooks/use-toast";
+import { userService } from "@/service/apiService";
 import { Usuario, UsuarioInput } from "../../../types";
 
 interface UserModalProps {
-  isOpen: boolean;
+  open: boolean;
   onClose: () => void;
+  user?: Usuario;
   onSuccess: () => void;
-  user?: Usuario | null;
 }
 
-export default function UserModal({ isOpen, onClose, onSuccess, user }: UserModalProps) {
-  const [submitting, setSubmitting] = useState(false);
+export default function UserModal({ open, onClose, user, onSuccess }: UserModalProps) {
   const { toast } = useToast();
-
-  const [formData, setFormData] = useState<UsuarioInput>({
-    nome: "",
-    email: "",
-    username: "",
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    nome: user?.nome || "",
+    username: user?.username || "",
     senha: "",
-    perfil: "usuario",
+    tipo: user?.tipo || "filho",
   });
-
-  useEffect(() => {
-    if (user) {
-      setFormData({
-        nome: user.nome,
-        email: user.email,
-        username: user.username,
-        senha: "",
-        perfil: user.perfil,
-      });
-    } else {
-      setFormData({
-        nome: "",
-        email: "",
-        username: "",
-        senha: "",
-        perfil: "usuario",
-      });
-    }
-  }, [user, isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    try {
-      setSubmitting(true);
+    if (!formData.nome.trim() || !formData.username.trim()) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Nome e username são obrigatórios",
+        variant: "destructive",
+      });
+      return;
+    }
 
-      if (user?.id) {
-        const updateData = { ...formData };
-        if (!updateData.senha) {
-          delete updateData.senha;
-        }
-        await userService.update(user.id, updateData);
+    if (!user && !formData.senha.trim()) {
+      toast({
+        title: "Senha obrigatória",
+        description: "A senha é obrigatória para novos usuários",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const userData: UsuarioInput = {
+        nome: formData.nome,
+        username: formData.username,
+        tipo: formData.tipo as "pai" | "mae" | "filho" | "filha" | "admin",
+        ...(formData.senha && { senha: formData.senha }),
+      };
+
+      if (user) {
+        await userService.update(user.id, userData);
         toast({
           title: "Usuário atualizado",
           description: "Usuário atualizado com sucesso",
         });
       } else {
-        await userService.create(formData);
+        await userService.create(userData);
         toast({
           title: "Usuário criado",
           description: "Usuário criado com sucesso",
@@ -73,118 +75,91 @@ export default function UserModal({ isOpen, onClose, onSuccess, user }: UserModa
       }
 
       onSuccess();
-    } catch (error: any) {
+      onClose();
+    } catch (error) {
       toast({
-        title: user?.id ? "Erro ao atualizar usuário" : "Erro ao criar usuário",
-        description: error.response?.data?.message || "Não foi possível salvar o usuário",
+        title: "Erro",
+        description: user ? "Erro ao atualizar usuário" : "Erro ao criar usuário",
         variant: "destructive",
       });
     } finally {
-      setSubmitting(false);
+      setLoading(false);
     }
   };
 
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>
-            {user?.id ? "Editar Usuário" : "Novo Usuário"}
-          </DialogTitle>
+          <DialogTitle>{user ? "Editar Usuário" : "Novo Usuário"}</DialogTitle>
+          <DialogDescription>
+            {user ? "Edite as informações do usuário" : "Preencha os dados do novo usuário"}
+          </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <Label htmlFor="nome" className="text-sm font-medium text-gray-700">
-              Nome Completo
-            </Label>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="nome">Nome *</Label>
             <Input
               id="nome"
-              type="text"
               value={formData.nome}
-              onChange={(e) => setFormData(prev => ({ ...prev, nome: e.target.value }))}
-              className="mt-2"
+              onChange={(e) => handleInputChange("nome", e.target.value)}
+              placeholder="Digite o nome completo"
               required
             />
           </div>
 
-          <div>
-            <Label htmlFor="email" className="text-sm font-medium text-gray-700">
-              E-mail
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-              className="mt-2"
-              required
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="username" className="text-sm font-medium text-gray-700">
-              Nome de Usuário
-            </Label>
+          <div className="space-y-2">
+            <Label htmlFor="username">Username *</Label>
             <Input
               id="username"
-              type="text"
               value={formData.username}
-              onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
-              className="mt-2"
+              onChange={(e) => handleInputChange("username", e.target.value)}
+              placeholder="Digite o username"
               required
             />
           </div>
 
-          <div>
-            <Label htmlFor="senha" className="text-sm font-medium text-gray-700">
-              Senha {user?.id && "(deixe em branco para não alterar)"}
-            </Label>
+          <div className="space-y-2">
+            <Label htmlFor="senha">Senha {!user && "*"}</Label>
             <Input
               id="senha"
               type="password"
               value={formData.senha}
-              onChange={(e) => setFormData(prev => ({ ...prev, senha: e.target.value }))}
-              className="mt-2"
-              required={!user?.id}
+              onChange={(e) => handleInputChange("senha", e.target.value)}
+              placeholder={user ? "Deixe em branco para manter atual" : "Digite a senha"}
+              required={!user}
             />
           </div>
 
-          <div>
-            <Label htmlFor="perfil" className="text-sm font-medium text-gray-700">
-              Perfil
-            </Label>
-            <Select value={formData.perfil} onValueChange={(value) => setFormData(prev => ({ ...prev, perfil: value as any }))}>
-              <SelectTrigger className="mt-2">
-                <SelectValue />
+          <div className="space-y-2">
+            <Label htmlFor="tipo">Tipo de Usuário *</Label>
+            <Select value={formData.tipo} onValueChange={(value) => handleInputChange("tipo", value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione o tipo" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="pai">Pai</SelectItem>
+                <SelectItem value="mae">Mãe</SelectItem>
+                <SelectItem value="filho">Filho</SelectItem>
+                <SelectItem value="filha">Filha</SelectItem>
                 <SelectItem value="admin">Administrador</SelectItem>
-                <SelectItem value="gerente">Gerente</SelectItem>
-                <SelectItem value="usuario">Usuário</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          <div className="flex gap-3">
-            <Button type="button" variant="outline" onClick={onClose} className="flex-1">
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose}>
               Cancelar
             </Button>
-            <Button 
-              type="submit" 
-              className="flex-1 bg-primary hover:bg-blue-700" 
-              disabled={submitting}
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Salvando...
-                </>
-              ) : (
-                user?.id ? "Atualizar" : "Criar"
-              )}
+            <Button type="submit" disabled={loading}>
+              {loading ? "Salvando..." : (user ? "Atualizar" : "Criar")}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
