@@ -78,14 +78,14 @@ export default function Sidebar() {
           <h1 className="text-lg font-semibold text-white">KIGI</h1>
         </div>
       </div>
-      
+
       {/* Navigation */}
       <div className="p-4">
         <ul className="space-y-1">
           {navigation.map((item) => {
             const isActive = isItemActive(item);
             const isExpanded = expandedItems.includes(item.name);
-            
+
             return (
               <li key={item.name}>
                 {item.children ? (
