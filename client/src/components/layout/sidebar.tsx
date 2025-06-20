@@ -4,71 +4,185 @@ import { cn } from "@/lib/utils";
 import { 
   Home, 
   Users, 
-  Plus, 
-  Minus, 
   Package, 
   Building, 
   Calendar, 
   BarChart3, 
   LogOut,
-  Wallet
+  ShoppingCart,
+  FileText,
+  ChevronDown,
+  ChevronRight,
+  Settings,
+  DollarSign,
+  List
 } from "lucide-react";
+import { useState } from "react";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: Home },
+  { name: "Pedidos", href: "/expenses", icon: ShoppingCart, badge: 8 },
+  { 
+    name: "Catálogo", 
+    icon: Package, 
+    children: [
+      { name: "Produtos", href: "/products" },
+      { name: "Categorias", href: "/categories" }
+    ]
+  },
   { name: "Usuários", href: "/users", icon: Users },
-  { name: "Entradas", href: "/income", icon: Plus },
-  { name: "Saídas", href: "/expenses", icon: Minus },
-  { name: "Produtos", href: "/products", icon: Package },
   { name: "Empresas", href: "/companies", icon: Building },
-  { name: "Parcelas", href: "/installments", icon: Calendar },
+  { 
+    name: "Estoque", 
+    icon: List,
+    children: [
+      { name: "Entradas", href: "/income" },
+      { name: "Relatórios", href: "/reports" }
+    ]
+  },
+  { 
+    name: "Financeiro", 
+    icon: DollarSign,
+    children: [
+      { name: "Parcelas", href: "/installments" },
+      { name: "Relatórios", href: "/reports" }
+    ]
+  },
   { name: "Relatórios", href: "/reports", icon: BarChart3 },
+  { name: "Logs", href: "/logs", icon: FileText },
+  { name: "Configurações", href: "/settings", icon: Settings },
 ];
 
 export default function Sidebar() {
   const [location] = useLocation();
+  const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
   const handleLogout = () => {
     authService.logout();
     window.location.reload();
   };
 
+  const toggleExpanded = (itemName: string) => {
+    setExpandedItems(prev => 
+      prev.includes(itemName) 
+        ? prev.filter(name => name !== itemName)
+        : [...prev, itemName]
+    );
+  };
+
+  const isItemActive = (item: any) => {
+    if (item.href) return location === item.href;
+    if (item.children) {
+      return item.children.some((child: any) => location === child.href);
+    }
+    return false;
+  };
+
   return (
-    <nav className="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
-      <div className="p-6 border-b border-gray-200">
+    <nav className="fixed inset-y-0 left-0 z-50 w-64 bg-gray-900 text-white transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
+      {/* Header */}
+      <div className="p-4 border-b border-gray-700">
         <div className="flex items-center">
-          <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center mr-3">
-            <Wallet className="h-6 w-6 text-white" />
+          <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center mr-3">
+            <span className="text-white font-bold text-sm">NG</span>
           </div>
-          <h1 className="text-xl font-bold text-gray-800">KIGI</h1>
+          <h1 className="text-lg font-semibold text-white">New Grãos</h1>
         </div>
       </div>
       
+      {/* Navigation */}
       <div className="p-4">
-        <ul className="space-y-2">
+        <ul className="space-y-1">
           {navigation.map((item) => {
-            const isActive = location === item.href;
+            const isActive = isItemActive(item);
+            const isExpanded = expandedItems.includes(item.name);
+            
             return (
               <li key={item.name}>
-                <Link href={item.href}>
-                  <a className={cn("nav-item", isActive && "active")}>
-                    <item.icon className="mr-3 h-5 w-5" />
-                    {item.name}
-                  </a>
-                </Link>
+                {item.children ? (
+                  // Menu with submenu
+                  <div>
+                    <button
+                      onClick={() => toggleExpanded(item.name)}
+                      className={cn(
+                        "w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors",
+                        isActive 
+                          ? "bg-green-600 text-white" 
+                          : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                      )}
+                    >
+                      <div className="flex items-center">
+                        <item.icon className="mr-3 h-4 w-4" />
+                        {item.name}
+                      </div>
+                      {isExpanded ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
+                    </button>
+                    {isExpanded && (
+                      <ul className="mt-1 ml-6 space-y-1">
+                        {item.children.map((child: any) => (
+                          <li key={child.name}>
+                            <Link href={child.href}>
+                              <a className={cn(
+                                "block px-3 py-2 text-sm rounded-lg transition-colors",
+                                location === child.href
+                                  ? "bg-green-600 text-white"
+                                  : "text-gray-400 hover:bg-gray-800 hover:text-white"
+                              )}>
+                                {child.name}
+                              </a>
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                ) : (
+                  // Simple menu item
+                  <Link href={item.href || "#"}>
+                    <a className={cn(
+                      "flex items-center px-3 py-2 text-sm rounded-lg transition-colors relative",
+                      isActive 
+                        ? "bg-green-600 text-white" 
+                        : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                    )}>
+                      <item.icon className="mr-3 h-4 w-4" />
+                      {item.name}
+                      {item.badge && (
+                        <span className="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-0.5 min-w-[20px] text-center">
+                          {item.badge}
+                        </span>
+                      )}
+                    </a>
+                  </Link>
+                )}
               </li>
             );
           })}
-          <li>
-            <button
-              onClick={handleLogout}
-              className="nav-item w-full text-left hover:bg-red-50 hover:text-red-600"
-            >
-              <LogOut className="mr-3 h-5 w-5" />
-              Sair
-            </button>
-          </li>
         </ul>
+      </div>
+
+      {/* User section at bottom */}
+      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-700">
+        <div className="flex items-center mb-3">
+          <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center mr-3">
+            <span className="text-white text-sm">A</span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-white truncate">Admin</p>
+            <p className="text-xs text-gray-400 truncate">Administrador</p>
+          </div>
+        </div>
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center px-3 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors"
+        >
+          <LogOut className="mr-3 h-4 w-4" />
+          Sair
+        </button>
       </div>
     </nav>
   );

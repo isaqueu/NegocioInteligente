@@ -103,9 +103,26 @@ export default function Dashboard() {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold text-gray-800 mb-2">Painel de Controle</h2>
-        <p className="text-gray-600">Visão geral do seu negócio, vendas e estatísticas</p>
+      <div className="mb-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-1">Painel de Controle</h2>
+            <p className="text-gray-600">Visão geral do seu negócio, vendas e estatísticas</p>
+          </div>
+          <div className="flex items-center space-x-2 text-sm text-gray-500">
+            <span>Últimos 7 dias</span>
+            <button className="p-1 hover:bg-gray-200 rounded">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </button>
+            <button className="p-1 hover:bg-gray-200 rounded">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Cards de Estatísticas */}
