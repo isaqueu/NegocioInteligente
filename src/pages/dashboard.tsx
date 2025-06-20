@@ -56,8 +56,8 @@ export default function Dashboard() {
     }
   };
 
-    const parcelasPendentes = parcelas?.filter(p =>
-        p.saidaOriginalId !== null && (p.status === 'a_vencer' || p.status === 'vencida')
+    const parcelasPendentes = parcelas?.filter(p => 
+        p && p.saidaOriginalId !== null && (p.status === 'a_vencer' || p.status === 'vencida')
     ) || [];
 
     // Dados para o gráfico de vendas diárias
@@ -81,25 +81,33 @@ export default function Dashboard() {
     ];
 
     // Produtos mais vendidos (baseado em dados reais)
-    const produtosMaisVendidos = produtos?.slice(0, 3).map((produto, index) => ({
-        produto: produto.nome,
-        quantidade: [127, 98, 76][index] || 50,
-        total: (parseFloat(produto.precoUnitario) * ([127, 98, 76][index] || 50)).toFixed(2)
-    })) || [];
+    const produtosMaisVendidos = produtos?.slice(0, 3).map((produto, index) => {
+        const preco = produto?.precoUnitario ? parseFloat(produto.precoUnitario) : 0;
+        const quantidade = [127, 98, 76][index] || 50;
+        const total = preco * quantidade;
+        
+        return {
+            produto: produto?.nome || 'Produto sem nome',
+            quantidade: quantidade,
+            total: total.toFixed(2)
+        };
+    }) || [];
 
     // Pedidos recentes (baseado em saídas)
     const pedidosRecentes = saidas?.slice(0, 5).map((saida, index) => {
-        const titularesIds = Array.isArray(saida.usuariosTitularesIds)
+        const titularesIds = Array.isArray(saida?.usuariosTitularesIds)
             ? saida.usuariosTitularesIds
-            : (typeof saida.usuariosTitularesIds === 'string'
+            : (typeof saida?.usuariosTitularesIds === 'string'
                 ? JSON.parse(saida.usuariosTitularesIds)
                 : []);
+
+        const valorTotal = saida?.valorTotal ? parseFloat(saida.valorTotal) : 0;
 
         return {
             id: `#${4000 + index}`,
             cliente: usuarios?.find(u => titularesIds.includes(u.id))?.nome || 'João Silva',
-            status: saida.tipoPagamento === 'avista' ? 'Entregue' : 'Em preparo',
-            total: saida.valorTotal.toFixed(2)
+            status: saida?.tipoPagamento === 'avista' ? 'Entregue' : 'Em preparo',
+            total: valorTotal.toFixed(2)
         };
     }) || [];
 
@@ -351,7 +359,7 @@ export default function Dashboard() {
                           {pedido.status}
                         </Badge>
                       </td>
-                      <td className="px-6 py-4 text-sm font-medium text-gray-900">{formatCurrency(parseFloat(pedido.total))}</td>
+                      <td className="px-6 py-4 text-sm font-medium text-gray-900">{formatCurrency(parseFloat(pedido.total || '0'))}</td>
                     </tr>
                   ))}
                   {pedidosRecentes.length === 0 && (
