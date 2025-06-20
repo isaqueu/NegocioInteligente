@@ -1,0 +1,50 @@
+2chunk-WERSD76P.js?v=ec5edb47:20442 Uncaught Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but got: undefined. You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.
+
+Check the render method of `Sidebar`.
+    at createFiberFromTypeAndProps (chunk-WERSD76P.js?v=ec5edb47:20442:23)
+    at createFiberFromElement (chunk-WERSD76P.js?v=ec5edb47:20463:23)
+    at createChild (chunk-WERSD76P.js?v=ec5edb47:10089:34)
+    at reconcileChildrenArray (chunk-WERSD76P.js?v=ec5edb47:10282:33)
+    at reconcileChildFibers2 (chunk-WERSD76P.js?v=ec5edb47:10559:24)
+    at reconcileChildren (chunk-WERSD76P.js?v=ec5edb47:14290:37)
+    at updateHostComponent (chunk-WERSD76P.js?v=ec5edb47:14807:11)
+    at beginWork (chunk-WERSD76P.js?v=ec5edb47:15935:22)
+    at HTMLUnknownElement.callCallback2 (chunk-WERSD76P.js?v=ec5edb47:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-WERSD76P.js?v=ec5edb47:3699:24)Understand this error
+2chunk-WERSD76P.js?v=ec5edb47:14032 The above error occurred in the <a> component:
+
+    at a
+    at https://e28a024d-e400-4176-97f5-02909e5dde83-00-68bhr3rb0iag.kirk.replit.dev/node_modules/.vite/deps/wouter.js?v=ec5edb47:268:18
+    at li
+    at ul
+    at div
+    at li
+    at ul
+    at div
+    at nav
+    at Sidebar (https://e28a024d-e400-4176-97f5-02909e5dde83-00-68bhr3rb0iag.kirk.replit.dev/src/components/layout/sidebar.tsx:57:22)
+    at div
+    at ProtectedRoute (https://e28a024d-e400-4176-97f5-02909e5dde83-00-68bhr3rb0iag.kirk.replit.dev/src/App.tsx:34:27)
+    at component
+    at Route (https://e28a024d-e400-4176-97f5-02909e5dde83-00-68bhr3rb0iag.kirk.replit.dev/node_modules/.vite/deps/wouter.js?v=ec5edb47:257:16)
+    at Switch (https://e28a024d-e400-4176-97f5-02909e5dde83-00-68bhr3rb0iag.kirk.replit.dev/node_modules/.vite/deps/wouter.js?v=ec5edb47:297:17)
+    at Router
+    at TooltipProvider (https://e28a024d-e400-4176-97f5-02909e5dde83-00-68bhr3rb0iag.kirk.replit.dev/src/components/ui/tooltip.tsx:17:35)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+logCapturedError @ chunk-WERSD76P.js?v=ec5edb47:14032Understand this error
+chunk-WERSD76P.js?v=ec5edb47:9129 Uncaught Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but got: undefined. You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.
+
+Check the render method of `Sidebar`.
+    at createFiberFromTypeAndProps (chunk-WERSD76P.js?v=ec5edb47:20442:23)
+    at createFiberFromElement (chunk-WERSD76P.js?v=ec5edb47:20463:23)
+    at createChild (chunk-WERSD76P.js?v=ec5edb47:10089:34)
+    at reconcileChildrenArray (chunk-WERSD76P.js?v=ec5edb47:10282:33)
+    at reconcileChildFibers2 (chunk-WERSD76P.js?v=ec5edb47:10559:24)
+    at reconcileChildren (chunk-WERSD76P.js?v=ec5edb47:14290:37)
+    at updateHostComponent (chunk-WERSD76P.js?v=ec5edb47:14807:11)
+    at beginWork (chunk-WERSD76P.js?v=ec5edb47:15935:22)
+    at beginWork$1 (chunk-WERSD76P.js?v=ec5edb47:19753:22)
+    at performUnitOfWork (chunk-WERSD76P.js?v=ec5edb47:19198:20)
