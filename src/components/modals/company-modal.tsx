@@ -74,7 +74,7 @@ export default function CompanyModal({ open, onClose, company, onSuccess }: Comp
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value });
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   return (
