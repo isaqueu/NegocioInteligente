@@ -16,15 +16,7 @@ import {
 } from "lucide-react";
 import type { User, ResumoFinanceiro } from "@shared/schema";
 
-interface TransacaoRelatorio {
-  id: string;
-  tipo: 'entrada' | 'saida';
-  data: string;
-  descricao: string;
-  usuario: string;
-  empresa: string;
-  valor: number;
-}
+// Removido: interface TransacaoRelatorio - usando Transacao do types.ts
 
 export default function Reports() {
   const [filters, setFilters] = useState({

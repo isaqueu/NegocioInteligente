@@ -15,7 +15,7 @@ import { Loader2, Plus, Trash2, QrCode, Search, Users } from "lucide-react";
 import BarcodeScanner from "@/components/barcode-scanner";
 import type { User, Empresa, Produto, SaidaInput, SaidaParceladaInput, ParcelaInput } from "@shared/schema";
 
-interface ItemSaida {
+interface ItemSaidaForm {
   produtoId: string;
   quantidade: string;
   precoUnitario: string;

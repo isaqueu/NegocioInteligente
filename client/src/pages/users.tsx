@@ -37,7 +37,7 @@ export default function Users() {
     },
   });
 
-  const handleEdit = (user: UserType) => {
+  const handleEdit = (user: Usuario) => {
     setEditingUser(user);
     setIsModalOpen(true);
   };

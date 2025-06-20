@@ -33,7 +33,7 @@ export default function Installments() {
     mutationFn: ({ id, dataPagamento }: { id: number; dataPagamento: string }) =>
       apiRequest("PATCH", `/api/saidas/${id}/pagar`, { dataPagamento }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/saidas/parcelas"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/parcelas"] });
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
       queryClient.invalidateQueries({ queryKey: ["/api/relatorios/resumo"] });
       toast({

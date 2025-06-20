@@ -21,34 +21,25 @@ import { useState } from "react";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: Home },
-  { name: "Saídas", href: "/expenses", icon: ShoppingCart, badge: 3 },
+  { name: "Usuários", href: "/users", icon: Users },
   { 
-    name: "Catálogo", 
+    name: "Cadastros", 
     icon: Package, 
     children: [
       { name: "Produtos", href: "/products" },
       { name: "Empresas", href: "/companies" }
     ]
   },
-  { name: "Usuários", href: "/users", icon: Users },
   { 
-    name: "Estoque", 
-    icon: List,
-    children: [
-      { name: "Entradas", href: "/income" },
-      { name: "Relatórios", href: "/reports" }
-    ]
-  },
-  { 
-    name: "Financeiro", 
+    name: "Movimentação", 
     icon: DollarSign,
     children: [
-      { name: "Parcelas", href: "/installments" },
-      { name: "Relatórios", href: "/reports" }
+      { name: "Entradas", href: "/income" },
+      { name: "Saídas", href: "/expenses" }
     ]
   },
-  { name: "Logs", href: "/logs", icon: FileText },
-  { name: "Configurações", href: "/settings", icon: Settings },
+  { name: "Parcelas", href: "/installments", icon: Calendar },
+  { name: "Relatórios", href: "/reports", icon: BarChart3 },
 ];
 
 export default function Sidebar() {
