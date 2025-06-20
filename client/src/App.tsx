@@ -52,7 +52,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
                 </div>
                 <input
                   type="text"
-                  placeholder="Buscar pedido, cliente..."
+                  placeholder="Buscar produto, usuário..."
                   className="block w-80 pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 />
               </div>
@@ -69,9 +69,9 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
                 </button>
               </div>
               <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-600">ING</span>
+                <span className="text-sm text-gray-600">KG</span>
                 <div className="flex items-center space-x-2">
-                  <span className="text-sm font-medium">Admin</span>
+                  <span className="text-sm font-medium">João Silva</span>
                   <span className="text-sm text-gray-500">Administrador</span>
                 </div>
                 <button className="p-1 rounded-full hover:bg-gray-100">

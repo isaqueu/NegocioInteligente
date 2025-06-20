@@ -131,66 +131,66 @@ export default function Dashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500 mb-1">Vendas Totais</p>
+                <p className="text-sm text-gray-500 mb-1">Saldo Familiar</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  R$ 24.502,00
+                  {formatCurrency(resumo.saldoFamiliar)}
                 </p>
                 <p className="text-xs text-green-600 mt-1">
-                  ↑ 13% em relação ao período anterior
-                </p>
-              </div>
-              <div className="text-2xl">📊</div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white border-0 shadow-sm hover:shadow-md transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500 mb-1">Novos Pedidos</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  +156
-                </p>
-                <p className="text-xs text-green-600 mt-1">
-                  ↑ 15% em relação ao período anterior
-                </p>
-              </div>
-              <div className="text-2xl">🛒</div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white border-0 shadow-sm hover:shadow-md transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500 mb-1">Clientes Ativos</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  423
-                </p>
-                <p className="text-xs text-green-600 mt-1">
-                  ↑ 8% em relação ao período anterior
-                </p>
-              </div>
-              <div className="text-2xl">👥</div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white border-0 shadow-sm hover:shadow-md transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500 mb-1">Ticket Médio</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  R$ 157,06
-                </p>
-                <p className="text-xs text-red-600 mt-1">
-                  ↓ 2% em relação ao período anterior
+                  Saldo consolidado da família
                 </p>
               </div>
               <div className="text-2xl">💰</div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white border-0 shadow-sm hover:shadow-md transition-shadow">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Entradas do Mês</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {formatCurrency(resumo.entradasMes)}
+                </p>
+                <p className="text-xs text-green-600 mt-1">
+                  Receitas registradas
+                </p>
+              </div>
+              <div className="text-2xl">📈</div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white border-0 shadow-sm hover:shadow-md transition-shadow">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Saídas do Mês</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {formatCurrency(resumo.saidasMes)}
+                </p>
+                <p className="text-xs text-red-600 mt-1">
+                  Gastos registrados
+                </p>
+              </div>
+              <div className="text-2xl">📉</div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white border-0 shadow-sm hover:shadow-md transition-shadow">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Parcelas Pendentes</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {formatCurrency(resumo.parcelasPendentes)}
+                </p>
+                <p className="text-xs text-yellow-600 mt-1">
+                  Valores a pagar
+                </p>
+              </div>
+              <div className="text-2xl">📅</div>
             </div>
           </CardContent>
         </Card>
@@ -198,11 +198,11 @@ export default function Dashboard() {
 
       {/* Gráficos */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* Gráfico de Vendas Diárias */}
+        {/* Gráfico de Movimentação Financeira */}
         <Card className="bg-white border-0 shadow-sm">
           <div className="p-6 border-b border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-800">Vendas diárias</h3>
-            <p className="text-sm text-gray-500">Data de vendas por hora na semana</p>
+            <h3 className="text-lg font-semibold text-gray-800">Movimentação diária</h3>
+            <p className="text-sm text-gray-500">Entradas e saídas por dia da semana</p>
           </div>
           <CardContent className="p-6">
             <ResponsiveContainer width="100%" height={300}>
@@ -230,8 +230,8 @@ export default function Dashboard() {
         {/* Gráfico de Pizza */}
         <Card className="bg-white border-0 shadow-sm">
           <div className="p-6 border-b border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-800">Vendas por categoria</h3>
-            <p className="text-sm text-gray-500">Distribuição de vendas por categoria de produto</p>
+            <h3 className="text-lg font-semibold text-gray-800">Gastos por categoria</h3>
+            <p className="text-sm text-gray-500">Distribuição de gastos por categoria de produto</p>
           </div>
           <CardContent className="p-6">
             <div className="flex items-center">
@@ -275,11 +275,11 @@ export default function Dashboard() {
 
       {/* Tabelas */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Produtos mais vendidos */}
+        {/* Produtos mais utilizados */}
         <Card className="bg-white border-0 shadow-sm">
           <div className="p-6 border-b border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-800">Produtos mais vendidos</h3>
-            <p className="text-sm text-gray-500">Top 5 produtos mais vendidos no período</p>
+            <h3 className="text-lg font-semibold text-gray-800">Produtos mais utilizados</h3>
+            <p className="text-sm text-gray-500">Top 5 produtos mais utilizados no período</p>
           </div>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
@@ -312,11 +312,11 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Pedidos recentes */}
+        {/* Transações recentes */}
         <Card className="bg-white border-0 shadow-sm">
           <div className="p-6 border-b border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-800">Pedidos recentes</h3>
-            <p className="text-sm text-gray-500">Últimos 5 pedidos recebidos</p>
+            <h3 className="text-lg font-semibold text-gray-800">Transações recentes</h3>
+            <p className="text-sm text-gray-500">Últimas 5 transações registradas</p>
           </div>
           <CardContent className="p-0">
             <div className="overflow-x-auto">

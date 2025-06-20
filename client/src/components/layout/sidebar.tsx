@@ -21,17 +21,16 @@ import { useState } from "react";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: Home },
-  { name: "Pedidos", href: "/expenses", icon: ShoppingCart, badge: 8 },
+  { name: "Saídas", href: "/expenses", icon: ShoppingCart, badge: 3 },
   { 
     name: "Catálogo", 
     icon: Package, 
     children: [
       { name: "Produtos", href: "/products" },
-      { name: "Categorias", href: "/categories" }
+      { name: "Empresas", href: "/companies" }
     ]
   },
   { name: "Usuários", href: "/users", icon: Users },
-  { name: "Empresas", href: "/companies", icon: Building },
   { 
     name: "Estoque", 
     icon: List,
@@ -48,7 +47,6 @@ const navigation = [
       { name: "Relatórios", href: "/reports" }
     ]
   },
-  { name: "Relatórios", href: "/reports", icon: BarChart3 },
   { name: "Logs", href: "/logs", icon: FileText },
   { name: "Configurações", href: "/settings", icon: Settings },
 ];
@@ -84,9 +82,9 @@ export default function Sidebar() {
       <div className="p-4 border-b border-gray-700">
         <div className="flex items-center">
           <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center mr-3">
-            <span className="text-white font-bold text-sm">NG</span>
+            <span className="text-white font-bold text-sm">KG</span>
           </div>
-          <h1 className="text-lg font-semibold text-white">New Grãos</h1>
+          <h1 className="text-lg font-semibold text-white">KIGI</h1>
         </div>
       </div>
       
@@ -126,14 +124,14 @@ export default function Sidebar() {
                         {item.children.map((child: any) => (
                           <li key={child.name}>
                             <Link href={child.href}>
-                              <a className={cn(
-                                "block px-3 py-2 text-sm rounded-lg transition-colors",
+                              <span className={cn(
+                                "block px-3 py-2 text-sm rounded-lg transition-colors cursor-pointer",
                                 location === child.href
                                   ? "bg-green-600 text-white"
                                   : "text-gray-400 hover:bg-gray-800 hover:text-white"
                               )}>
                                 {child.name}
-                              </a>
+                              </span>
                             </Link>
                           </li>
                         ))}
@@ -143,8 +141,8 @@ export default function Sidebar() {
                 ) : (
                   // Simple menu item
                   <Link href={item.href || "#"}>
-                    <a className={cn(
-                      "flex items-center px-3 py-2 text-sm rounded-lg transition-colors relative",
+                    <span className={cn(
+                      "flex items-center px-3 py-2 text-sm rounded-lg transition-colors relative cursor-pointer",
                       isActive 
                         ? "bg-green-600 text-white" 
                         : "text-gray-300 hover:bg-gray-800 hover:text-white"
@@ -156,7 +154,7 @@ export default function Sidebar() {
                           {item.badge}
                         </span>
                       )}
-                    </a>
+                    </span>
                   </Link>
                 )}
               </li>
