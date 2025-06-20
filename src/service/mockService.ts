@@ -1,4 +1,3 @@
-
 import {
   Usuario,
   UsuarioInput,
@@ -34,17 +33,28 @@ let installments = [...mockInstallments];
 // Serviços de Autenticação Mock
 export const mockAuthService = {
   login: async (username: string, senha: string): Promise<{ user: Usuario; token: string }> => {
-    await mockDelay();
-    
-    const user = users.find(u => u.email === username);
-    if (!user || senha !== 'password123') {
-      throw new Error('Credenciais inválidas');
+    // Simular delay da API
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Verificar credenciais - comparar com dados mock
+    if (username === 'admin' && senha === '123456') {
+      const user = {
+        id: 1,
+        nome: 'Administrador',
+        username: 'admin',
+        tipo: 'admin' as const,
+        ativo: true,
+        criadoEm: new Date().toISOString(),
+        atualizadoEm: new Date().toISOString()
+      };
+
+      return {
+        user,
+        token: `mock-token-${user.id}-${Date.now()}`
+      };
     }
-    
-    return {
-      user,
-      token: 'mock-jwt-token-12345',
-    };
+
+    throw new Error('Credenciais inválidas');
   },
 
   logout: async (): Promise<void> => {
@@ -53,8 +63,25 @@ export const mockAuthService = {
   },
 
   getCurrentUser: async (): Promise<Usuario> => {
-    await mockDelay();
-    return users[0]; // Retorna o primeiro usuário como usuário atual
+    // Simular delay da API
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Retornar usuário atual baseado no token (simulado)
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      throw new Error('Token não encontrado');
+    }
+
+    // Simular retorno do usuário admin
+    return {
+      id: 1,
+      nome: 'Administrador',
+      username: 'admin',
+      tipo: 'admin',
+      ativo: true,
+      criadoEm: new Date().toISOString(),
+      atualizadoEm: new Date().toISOString()
+    };
   },
 };
 
@@ -89,7 +116,7 @@ export const mockUserService = {
     await mockDelay();
     const index = users.findIndex(u => u.id === id);
     if (index === -1) throw new Error('Usuário não encontrado');
-    
+
     users[index] = {
       ...users[index],
       ...userData,
@@ -137,7 +164,7 @@ export const mockCompanyService = {
     await mockDelay();
     const index = companies.findIndex(c => c.id === id);
     if (index === -1) throw new Error('Empresa não encontrada');
-    
+
     companies[index] = {
       ...companies[index],
       ...companyData,
@@ -192,7 +219,7 @@ export const mockProductService = {
     await mockDelay();
     const index = products.findIndex(p => p.id === id);
     if (index === -1) throw new Error('Produto não encontrado');
-    
+
     products[index] = {
       ...products[index],
       ...productData,
@@ -239,7 +266,7 @@ export const mockIncomeService = {
     await mockDelay();
     const index = incomes.findIndex(i => i.id === id);
     if (index === -1) throw new Error('Entrada não encontrada');
-    
+
     incomes[index] = {
       ...incomes[index],
       ...incomeData,
@@ -291,7 +318,7 @@ export const mockExpenseService = {
     await mockDelay();
     const index = expenses.findIndex(e => e.id === id);
     if (index === -1) throw new Error('Saída não encontrada');
-    
+
     expenses[index] = {
       ...expenses[index],
       ...expenseData,
@@ -326,7 +353,7 @@ export const mockInstallmentService = {
     await mockDelay();
     const index = installments.findIndex(i => i.id === id);
     if (index === -1) throw new Error('Parcela não encontrada');
-    
+
     installments[index] = {
       ...installments[index],
       pago: true,

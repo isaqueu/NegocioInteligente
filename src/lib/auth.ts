@@ -35,7 +35,8 @@ class AuthService {
   }
 
   isAuthenticated(): boolean {
-    return this.user !== null && localStorage.getItem('authToken') !== null;
+    const hasToken = localStorage.getItem('authToken') !== null;
+    return hasToken;
   }
 
   async refreshUser(): Promise<void> {
@@ -45,6 +46,14 @@ class AuthService {
       }
     } catch (error) {
       this.logout();
+    }
+  }
+
+  initializeFromStorage(): void {
+    const token = localStorage.getItem('authToken');
+    if (token && !this.user) {
+      // Se tem token mas não tem usuário, tentar recuperar
+      this.refreshUser();
     }
   }
 }

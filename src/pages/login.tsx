@@ -22,13 +22,21 @@ export default function Login({ onLogin }: LoginProps) {
     setIsLoading(true);
 
     try {
-      await authService.login(username, senha);
+      console.log('Tentando fazer login com:', { username, senha });
+      const user = await authService.login(username, senha);
+      console.log('Login bem-sucedido:', user);
+      
       toast({
         title: "Login realizado com sucesso!",
         description: "Bem-vindo ao KIGI Sistema Financeiro Familiar",
       });
-      onLogin();
+      
+      // Força atualização do estado de autenticação
+      setTimeout(() => {
+        onLogin();
+      }, 100);
     } catch (error) {
+      console.error('Erro no login:', error);
       toast({
         title: "Erro no login",
         description: "Usuário ou senha inválidos",

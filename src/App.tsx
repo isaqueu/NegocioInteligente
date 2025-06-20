@@ -17,9 +17,13 @@ import { useState, useEffect } from "react";
 import NotFound from "@/pages/not-found";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(authService.isAuthenticated());
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
+    // Inicializar autenticação
+    authService.initializeFromStorage();
+    setIsAuthenticated(authService.isAuthenticated());
+    
     const checkAuth = () => setIsAuthenticated(authService.isAuthenticated());
     const interval = setInterval(checkAuth, 1000);
     return () => clearInterval(interval);
