@@ -101,7 +101,7 @@ export default function Sidebar() {
                       )}
                     >
                       <div className="flex items-center">
-                        <item.icon className="mr-3 h-4 w-4" />
+                        {item.icon && <item.icon className="mr-3 h-4 w-4" />}
                         {item.name}
                       </div>
                       {isExpanded ? (
@@ -119,7 +119,7 @@ export default function Sidebar() {
                             ? 'bg-green-600 text-white' 
                             : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                         }`}>
-                          <child.icon className="h-4 w-4 mr-3" />
+                          {child.icon && <child.icon className="h-4 w-4 mr-3" />}
                           {child.name}
                         </Link>
                           </li>
@@ -135,7 +135,7 @@ export default function Sidebar() {
                       ? "bg-green-600 text-white" 
                       : "text-gray-300 hover:bg-gray-800 hover:text-white"
                   )}>
-                    <item.icon className="mr-3 h-4 w-4" />
+                    {item.icon && <item.icon className="mr-3 h-4 w-4" />}
                     {item.name}
                     {item.badge && (
                       <span className="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-0.5 min-w-[20px] text-center">
