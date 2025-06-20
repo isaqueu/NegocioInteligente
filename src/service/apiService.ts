@@ -1,3 +1,4 @@
+
 import api from './api';
 import {
   Usuario,
@@ -14,10 +15,24 @@ import {
   ResumoFinanceiro,
   Transacao,
 } from '../../types';
-// Configuração para desenvolvimento - remover dados mock
 
-// Serviços de Autenticação
-export const authService = {
+// Importar serviços mockados
+import {
+  mockAuthService,
+  mockUserService,
+  mockCompanyService,
+  mockProductService,
+  mockIncomeService,
+  mockExpenseService,
+  mockInstallmentService,
+  mockReportService,
+} from './mockService';
+
+// Flag para determinar se deve usar mock ou API real
+const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
+
+// Serviços de Autenticação Reais
+const realAuthService = {
   login: async (username: string, senha: string): Promise<{ user: Usuario; token: string }> => {
     const response = await api.post('/auth/login', { username, senha });
     return response.data;
@@ -34,8 +49,8 @@ export const authService = {
   },
 };
 
-// Serviços de Usuários
-export const userService = {
+// Serviços de Usuários Reais
+const realUserService = {
   getAll: async (): Promise<Usuario[]> => {
     const response = await api.get('/usuarios');
     return response.data;
@@ -61,8 +76,8 @@ export const userService = {
   },
 };
 
-// Serviços de Empresas
-export const companyService = {
+// Serviços de Empresas Reais
+const realCompanyService = {
   getAll: async (): Promise<Empresa[]> => {
     const response = await api.get('/empresas');
     return response.data;
@@ -88,8 +103,8 @@ export const companyService = {
   },
 };
 
-// Serviços de Produtos
-export const productService = {
+// Serviços de Produtos Reais
+const realProductService = {
   getAll: async (): Promise<Produto[]> => {
     const response = await api.get('/produtos');
     return response.data;
@@ -120,8 +135,8 @@ export const productService = {
   },
 };
 
-// Serviços de Entradas
-export const incomeService = {
+// Serviços de Entradas Reais
+const realIncomeService = {
   getAll: async (): Promise<Entrada[]> => {
     const response = await api.get('/entradas');
     return response.data;
@@ -147,8 +162,8 @@ export const incomeService = {
   },
 };
 
-// Serviços de Saídas
-export const expenseService = {
+// Serviços de Saídas Reais
+const realExpenseService = {
   getAll: async (): Promise<Saida[]> => {
     const response = await api.get('/saidas');
     return response.data;
@@ -179,8 +194,8 @@ export const expenseService = {
   },
 };
 
-// Serviços de Parcelas
-export const installmentService = {
+// Serviços de Parcelas Reais
+const realInstallmentService = {
   getAll: async (): Promise<Parcela[]> => {
     const response = await api.get('/parcelas');
     return response.data;
@@ -196,8 +211,8 @@ export const installmentService = {
   },
 };
 
-// Serviços de Relatórios
-export const reportService = {
+// Serviços de Relatórios Reais
+const realReportService = {
   getFinancialSummary: async (): Promise<ResumoFinanceiro> => {
     const response = await api.get('/relatorios/resumo');
     return response.data;
@@ -213,3 +228,16 @@ export const reportService = {
     return response.data;
   },
 };
+
+// Exportação condicional dos serviços
+export const authService = USE_MOCK ? mockAuthService : realAuthService;
+export const userService = USE_MOCK ? mockUserService : realUserService;
+export const companyService = USE_MOCK ? mockCompanyService : realCompanyService;
+export const productService = USE_MOCK ? mockProductService : realProductService;
+export const incomeService = USE_MOCK ? mockIncomeService : realIncomeService;
+export const expenseService = USE_MOCK ? mockExpenseService : realExpenseService;
+export const installmentService = USE_MOCK ? mockInstallmentService : realInstallmentService;
+export const reportService = USE_MOCK ? mockReportService : realReportService;
+
+// Log para indicar qual modo está sendo usado
+console.log(`🔧 Modo de operação: ${USE_MOCK ? 'MOCK' : 'API REAL'}`);

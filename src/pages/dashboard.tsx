@@ -1,118 +1,114 @@
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { formatCurrency, formatDate, getStatusBadgeColor, getStatusLabel } from "@/lib/utils";
-import { 
-  Wallet, 
-  TrendingUp, 
-  TrendingDown, 
-  Clock, 
-  Plus, 
-  Minus,
-  DollarSign,
-  ShoppingCart,
-  Package,
-  Users,
-  Calendar
-} from "lucide-react";
+import { formatCurrency } from "@/lib/utils";
+import { reportService, userService } from "@/service/apiService";
+import { useToast } from "@/hooks/use-toast";
+import { TrendingUp, TrendingDown, Wallet, Users, Loader2 } from "lucide-react";
+import { ResumoFinanceiro, Transacao, Usuario } from "../../types";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { reportService, productService, incomeService, expenseService, userService } from "@/service/apiService";
-import { ResumoFinanceiro, Transacao } from "../../types";
+import { productService, incomeService, expenseService } from "@/service/apiService";
 
 export default function Dashboard() {
-  const { data: resumo, isLoading: resumoLoading } = useQuery({
-    queryKey: ["financial-summary"],
-    queryFn: reportService.getFinancialSummary,
-  });
+  const { toast } = useToast();
+  const [resumo, setResumo] = useState<ResumoFinanceiro | null>(null);
+  const [transacoes, setTransacoes] = useState<Transacao[]>([]);
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const [loading, setLoading] = useState(true);
+    const [parcelas, setParcelas] = useState([]);
+    const [produtos, setProdutos] = useState([]);
+    const [entradas, setEntradas] = useState([]);
+    const [saidas, setSaidas] = useState([]);
 
-  const { data: transacoes, isLoading: transacoesLoading } = useQuery({
-    queryKey: ["recent-transactions"],
-    queryFn: () => reportService.getRecentTransactions(10),
-  });
 
-  const { data: parcelas, isLoading: parcelasLoading } = useQuery({
-    queryKey: ["expenses-with-installments"],
-    queryFn: expenseService.getWithInstallments,
-  });
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
 
-  const { data: produtos } = useQuery({
-    queryKey: ["products"],
-    queryFn: productService.getAll,
-  });
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true);
+      const [resumoData, transacoesData, usuariosData, parcelasData, produtosData, entradasData, saidasData] = await Promise.all([
+        reportService.getFinancialSummary(),
+        reportService.getRecentTransactions(10),
+        userService.getAll(),
+            expenseService.getWithInstallments(),
+            productService.getAll(),
+            incomeService.getAll(),
+            expenseService.getAll(),
+      ]);
 
-  const { data: entradas } = useQuery({
-    queryKey: ["incomes"],
-    queryFn: incomeService.getAll,
-  });
+      setResumo(resumoData);
+      setTransacoes(transacoesData);
+      setUsuarios(usuariosData);
+            setParcelas(parcelasData);
+            setProdutos(produtosData);
+            setEntradas(entradasData);
+            setSaidas(saidasData);
+    } catch (error) {
+      toast({
+        title: "Erro ao carregar dados",
+        description: "Não foi possível carregar os dados do dashboard",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const { data: saidas } = useQuery({
-    queryKey: ["expenses"],
-    queryFn: expenseService.getAll,
-  });
+    const parcelasPendentes = parcelas?.filter(p =>
+        p.saidaOriginalId !== null && (p.status === 'a_vencer' || p.status === 'vencida')
+    ) || [];
 
-  const { data: users } = useQuery({
-    queryKey: ["users"],
-    queryFn: userService.getAll,
-  });
+    // Dados para o gráfico de vendas diárias
+    const vendasDiarias = [
+        { dia: 'Seg', valor: 380000 },
+        { dia: 'Ter', valor: 420000 },
+        { dia: 'Qua', valor: 450000 },
+        { dia: 'Qui', valor: 480000 },
+        { dia: 'Sex', valor: 520000 },
+        { dia: 'Sáb', valor: 390000 },
+        { dia: 'Dom', valor: 350000 }
+    ];
 
-  const parcelasPendentes = parcelas?.filter(p => 
-    p.saidaOriginalId !== null && (p.status === 'a_vencer' || p.status === 'vencida')
-  ) || [];
+    // Dados para o gráfico de pizza
+    const vendaCategoria = [
+        { nome: 'Supermercado', valor: 35, cor: '#0ea5e9' },
+        { nome: 'Cha e Ervas', valor: 20, cor: '#10b981' },
+        { nome: 'Cosméticos', valor: 18, cor: '#f59e0b' },
+        { nome: 'Outros', valor: 15, cor: '#8b5cf6' },
+        { nome: 'Farmácia', valor: 12, cor: '#ef4444' }
+    ];
 
-  // Dados para o gráfico de vendas diárias
-  const vendasDiarias = [
-    { dia: 'Seg', valor: 380000 },
-    { dia: 'Ter', valor: 420000 },
-    { dia: 'Qua', valor: 450000 },
-    { dia: 'Qui', valor: 480000 },
-    { dia: 'Sex', valor: 520000 },
-    { dia: 'Sáb', valor: 390000 },
-    { dia: 'Dom', valor: 350000 }
-  ];
+    // Produtos mais vendidos (baseado em dados reais)
+    const produtosMaisVendidos = produtos?.slice(0, 3).map((produto, index) => ({
+        produto: produto.nome,
+        quantidade: [127, 98, 76][index] || 50,
+        total: (parseFloat(produto.precoUnitario) * ([127, 98, 76][index] || 50)).toFixed(2)
+    })) || [];
 
-  // Dados para o gráfico de pizza
-  const vendaCategoria = [
-    { nome: 'Supermercado', valor: 35, cor: '#0ea5e9' },
-    { nome: 'Cha e Ervas', valor: 20, cor: '#10b981' },
-    { nome: 'Cosméticos', valor: 18, cor: '#f59e0b' },
-    { nome: 'Outros', valor: 15, cor: '#8b5cf6' },
-    { nome: 'Farmácia', valor: 12, cor: '#ef4444' }
-  ];
+    // Pedidos recentes (baseado em saídas)
+    const pedidosRecentes = saidas?.slice(0, 5).map((saida, index) => {
+        const titularesIds = Array.isArray(saida.usuariosTitularesIds)
+            ? saida.usuariosTitularesIds
+            : (typeof saida.usuariosTitularesIds === 'string'
+                ? JSON.parse(saida.usuariosTitularesIds)
+                : []);
 
-  // Produtos mais vendidos (baseado em dados reais)
-  const produtosMaisVendidos = produtos?.slice(0, 3).map((produto, index) => ({
-    produto: produto.nome,
-    quantidade: [127, 98, 76][index] || 50,
-    total: (parseFloat(produto.precoUnitario) * ([127, 98, 76][index] || 50)).toFixed(2)
-  })) || [];
+        return {
+            id: `#${4000 + index}`,
+            cliente: usuarios?.find(u => titularesIds.includes(u.id))?.nome || 'João Silva',
+            status: saida.tipoPagamento === 'avista' ? 'Entregue' : 'Em preparo',
+            total: saida.valorTotal.toFixed(2)
+        };
+    }) || [];
 
-  // Pedidos recentes (baseado em saídas)
-  const pedidosRecentes = saidas?.slice(0, 5).map((saida, index) => {
-    const titularesIds = Array.isArray(saida.usuariosTitularesIds) 
-      ? saida.usuariosTitularesIds 
-      : (typeof saida.usuariosTitularesIds === 'string' 
-          ? JSON.parse(saida.usuariosTitularesIds) 
-          : []);
-    
-    return {
-      id: `#${4000 + index}`,
-      cliente: users?.find(u => titularesIds.includes(u.id))?.nome || 'João Silva',
-      status: saida.tipoPagamento === 'avista' ? 'Entregue' : 'Em preparo',
-      total: saida.valorTotal.toFixed(2)
-    };
-  }) || [];
 
-  if (resumoLoading || transacoesLoading || parcelasLoading) {
+  if (loading) {
     return (
-      <div className="p-6">
-        <div className="animate-pulse space-y-6">
-          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="h-32 bg-gray-200 rounded-xl"></div>
-            ))}
-          </div>
-        </div>
+      <div className="flex items-center justify-center h-96">
+        <Loader2 className="mr-2 h-8 w-8 animate-spin" />
+        <div className="text-lg">Carregando dashboard...</div>
       </div>
     );
   }
@@ -149,7 +145,7 @@ export default function Dashboard() {
               <div>
                 <p className="text-sm text-gray-500 mb-1">Saldo Familiar</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {formatCurrency(resumo.saldoFamiliar)}
+                  {formatCurrency(resumo?.saldoFamiliar || 0)}
                 </p>
                 <p className="text-xs text-green-600 mt-1">
                   Saldo consolidado da família
@@ -166,7 +162,7 @@ export default function Dashboard() {
               <div>
                 <p className="text-sm text-gray-500 mb-1">Entradas do Mês</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {formatCurrency(resumo.entradasMes)}
+                  {formatCurrency(resumo?.entradasMes || 0)}
                 </p>
                 <p className="text-xs text-green-600 mt-1">
                   Receitas registradas
@@ -183,7 +179,7 @@ export default function Dashboard() {
               <div>
                 <p className="text-sm text-gray-500 mb-1">Saídas do Mês</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {formatCurrency(resumo.saidasMes)}
+                  {formatCurrency(resumo?.saidasMes || 0)}
                 </p>
                 <p className="text-xs text-red-600 mt-1">
                   Gastos registrados
@@ -200,7 +196,7 @@ export default function Dashboard() {
               <div>
                 <p className="text-sm text-gray-500 mb-1">Parcelas Pendentes</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {formatCurrency(resumo.parcelasPendentes)}
+                  {formatCurrency(resumo?.parcelasPendentes || 0)}
                 </p>
                 <p className="text-xs text-yellow-600 mt-1">
                   Valores a pagar
@@ -226,14 +222,14 @@ export default function Dashboard() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="dia" stroke="#666" fontSize={12} />
                 <YAxis stroke="#666" fontSize={12} tickFormatter={(value) => `R$ ${(value/1000).toFixed(0)}k`} />
-                <Tooltip 
+                <Tooltip
                   formatter={(value: number) => [`R$ ${value.toLocaleString('pt-BR')}`, 'Vendas']}
                   labelFormatter={(label) => `${label}`}
                 />
-                <Line 
-                  type="monotone" 
-                  dataKey="valor" 
-                  stroke="#10b981" 
+                <Line
+                  type="monotone"
+                  dataKey="valor"
+                  stroke="#10b981"
                   strokeWidth={3}
                   dot={{ fill: '#10b981', strokeWidth: 2, r: 6 }}
                   activeDot={{ r: 8 }}
@@ -275,8 +271,8 @@ export default function Dashboard() {
                 <div className="space-y-3">
                   {vendaCategoria.map((categoria, index) => (
                     <div key={index} className="flex items-center text-sm">
-                      <div 
-                        className="w-3 h-3 rounded-full mr-2" 
+                      <div
+                        className="w-3 h-3 rounded-full mr-2"
                         style={{ backgroundColor: categoria.cor }}
                       ></div>
                       <span className="text-gray-700">{categoria.nome} {categoria.valor}%</span>
